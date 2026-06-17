@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — Predictive</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="navbar"></div>
+<div class="page">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> › Predictive & Forecasting</div>
+  <div class="page-header">
+    <div class="page-title">🔮 Predictive & Forecasting</div>
+    <div class="page-sub">Running hours · Maintenance schedule · Performance trends · RUL estimator · Next overhaul forecast</div>
+  </div>
+  <div id="vessel-strip"></div>
+
+  <!-- Running Hours -->
+  <div class="section">
+    <div class="section-title">A. Running Hours Log</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Installation Date</label><input type="date" id="install-date"/></div>
+        <div class="form-group"><label>Commissioning Hours</label><input type="number" id="comm-hours" value="0" placeholder="0"/></div>
+        <div class="form-group"><label>Current Running Hours</label><input type="number" id="cur-hours" placeholder="0" oninput="updateSchedule()"/></div>
+        <div class="form-group"><label>Avg Daily Running (hrs)</label><input type="number" id="daily-hrs" value="20" step="0.5" oninput="updateSchedule()"/></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="addHoursEntry()">+ Add Daily Log Entry</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table>
+          <thead><tr><th>Date</th><th>Start Hours</th><th>Stop Hours</th><th>Run Hours</th><th>Remarks</th><th class="no-print"></th></tr></thead>
+          <tbody id="hours-log-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Maintenance Schedule -->
+  <div class="section">
+    <div class="section-title">B. Maintenance Schedule</div>
+    <div id="maint-grid" class="grid-3"></div>
+  </div>
+
+  <!-- Performance Trend Entry -->
+  <div class="section">
+    <div class="section-title">C. Performance Log (for trend analysis)</div>
+    <div class="callout">Log performance readings periodically. Charts update automatically.</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Date</label><input type="date" id="pt-date"/></div>
+        <div class="form-group"><label>Running Hours</label><input type="number" id="pt-hrs" placeholder=""/></div>
+        <div class="form-group"><label>RPM</label><input type="number" id="pt-rpm" placeholder=""/></div>
+        <div class="form-group"><label>Power (kW)</label><input type="number" id="pt-pwr" placeholder=""/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>SFOC (g/kWh)</label><input type="number" id="pt-sfoc" placeholder=""/></div>
+        <div class="form-group"><label>Exh Avg Temp (°C)</label><input type="number" id="pt-exh" placeholder=""/></div>
+        <div class="form-group"><label>LO Consumption (L/day)</label><input type="number" id="pt-loc" placeholder=""/></div>
+        <div class="form-group"><label>Vibration (mm/s)</label><input type="number" id="pt-vib" step="0.1" placeholder=""/></div>
+      </div>
+      <div class="form-group"><label>Remarks / Condition Notes</label><input type="text" id="pt-rem" placeholder="Any observations..."/></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="addPerfEntry()">+ Add Entry</button></div>
+    </div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table>
+        <thead><tr><th>Date</th><th>Hours</th><th>RPM</th><th>kW</th><th>SFOC</th><th>Exh°C</th><th>LO(L/d)</th><th>Vib</th><th>Remarks</th><th class="no-print"></th></tr></thead>
+        <tbody id="perf-log-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="section">
+    <div class="section-title">D. Performance Trend Charts</div>
+    <div class="grid-2">
+      <div class="chart-box"><div class="chart-title">SFOC Trend (g/kWh)</div><canvas id="sfoc-chart" height="120"></canvas></div>
+      <div class="chart-box"><div class="chart-title">Exhaust Temperature Trend (°C)</div><canvas id="exh-chart" height="120"></canvas></div>
+    </div>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="chart-box"><div class="chart-title">LO Consumption Trend (L/day)</div><canvas id="lo-chart" height="120"></canvas></div>
+      <div class="chart-box"><div class="chart-title">Vibration Trend (mm/s)</div><canvas id="vib-chart" height="120"></canvas></div>
+    </div>
+  </div>
+
+  <!-- RUL Estimator -->
+  <div class="section">
+    <div class="section-title">E. Remaining Useful Life (RUL) Estimator</div>
+    <div class="card">
+      <div class="form-row col-3">
+        <div class="form-group"><label>Design Life (hours)</label><input type="number" id="rul-design" value="80000" oninput="calcRUL()"/></div>
+        <div class="form-group"><label>Condition Factor (0.5–1.0)</label><input type="number" id="rul-condition" value="1.0" step="0.05" min="0.5" max="1.0" oninput="calcRUL()"/></div>
+        <div class="form-group"><label>Maintenance Factor (0.5–1.0)</label><input type="number" id="rul-maint" value="1.0" step="0.05" min="0.5" max="1.0" oninput="calcRUL()"/></div>
+      </div>
+      <div id="rul-result"></div>
+    </div>
+  </div>
+
+  <!-- Forecast -->
+  <div class="section">
+    <div class="section-title">F. Upcoming Events Forecast</div>
+    <div id="forecast-grid" class="grid-3"></div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="savePred()">💾 Save</button>
+    <button class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
+    <button class="btn btn-outline" onclick="exportPredExcel()">📊 Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+  </div>
+</div>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+buildNavbar('predictive');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+
+let perfLog  = EP.load('pred-perf', []);
+let hoursLog = EP.load('pred-hours', []);
+
+const INTERVALS = [
+  { label:'Daily Check',         hours:24,    icon:'📋', items:'LO level, fuel, cooling water, bilges, alarms' },
+  { label:'Weekly Check',        hours:168,   icon:'📅', items:'Filters inspection, battery check, belts/hoses, bearing lubrication' },
+  { label:'250-Hour Service',    hours:250,   icon:'🔩', items:'LO & filters change, injector cleaning, governor oil, V-belt tension' },
+  { label:'500-Hour Service',    hours:500,   icon:'🔧', items:'Air filter, fuel filter, coolant treatment, coupling inspection' },
+  { label:'1,000-Hour Major',    hours:1000,  icon:'⚙️', items:'Valve clearance, injector testing, T/C inspection, LO sample analysis' },
+  { label:'2,000-Hour Overhaul', hours:2000,  icon:'🏗️', items:'Piston & liner inspection, bearing check, fuel pump overhaul' },
+  { label:'4,000-Hour Overhaul', hours:4000,  icon:'🔨', items:'Top overhaul — head removal, valve seat grinding, piston ring renewal' },
+  { label:'8,000-Hour Major',    hours:8000,  icon:'⚡', items:'Major overhaul — crank bearing, T/C rebuild, full inspection' },
+  { label:'Dry Dock (5-year)',   hours:43800, icon:'🚢', items:'Underwater inspection, shaft seal, propeller, sea chests, class renewal' },
+];
+
+function updateSchedule() {
+  const cur = parseFloat(document.getElementById('cur-hours')?.value)||0;
+  const daily = parseFloat(document.getElementById('daily-hrs')?.value)||20;
+  document.getElementById('maint-grid').innerHTML = INTERVALS.map(s => {
+    const done  = cur >= s.hours;
+    const next  = Math.ceil(cur/s.hours)*s.hours;
+    const rem   = Math.max(0, next - cur);
+    const days  = daily ? Math.ceil(rem/daily) : '?';
+    const dueDate = new Date(Date.now() + days*86400000);
+    const pct   = Math.min(100, (cur % s.hours) / s.hours * 100);
+    const urgent = rem < s.hours*0.1;
+    return `<div class="card" style="border-color:${urgent?'rgba(245,158,11,0.5)':done?'rgba(34,197,94,0.2)':'var(--border)'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <span style="font-size:18px">${s.icon}</span>
+        ${urgent?'<span class="badge badge-warn">Due Soon</span>':done?'<span class="badge badge-pass">Due</span>':''}
+      </div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:3px">${s.label}</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px">${s.items}</div>
+      <div style="background:var(--bg-raised);border-radius:4px;height:4px;margin-bottom:6px">
+        <div style="background:${urgent?'var(--warn)':'var(--teal)'};width:${pct}%;height:4px;border-radius:4px;transition:width .5s"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted)">
+        Next at <strong>${next.toLocaleString()} hrs</strong> · Remaining: <strong>${rem.toLocaleString()} hrs</strong>
+        ${days!=='?'?`<br>Est. date: <strong>${dueDate.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</strong>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Forecast
+  const upcoming = INTERVALS.filter(s => {
+    const next = Math.ceil(cur/s.hours)*s.hours;
+    return (next - cur) < s.hours * 0.15 || cur >= s.hours;
+  }).slice(0,6);
+  document.getElementById('forecast-grid').innerHTML = upcoming.length
+    ? upcoming.map(s=>{
+        const next = Math.ceil(cur/s.hours)*s.hours;
+        const rem  = Math.max(0,next-cur);
+        const daily2 = daily||20;
+        const dueDate2 = new Date(Date.now()+(rem/daily2)*86400000);
+        return `<div class="stat-tile" style="border-color:rgba(245,158,11,0.4)">
+          <div class="stat-label">${s.icon} ${s.label}</div>
+          <div class="stat-value" style="font-size:16px;color:var(--warn)">${rem.toLocaleString()} hrs</div>
+          <div class="stat-sub">${dueDate2.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
+        </div>`;
+      }).join('')
+    : '<div class="callout">Enter running hours above to see upcoming maintenance events.</div>';
+
+  calcRUL();
+}
+
+function calcRUL() {
+  const cur     = parseFloat(document.getElementById('cur-hours')?.value)||0;
+  const design  = parseFloat(document.getElementById('rul-design')?.value)||80000;
+  const cond    = parseFloat(document.getElementById('rul-condition')?.value)||1;
+  const maint   = parseFloat(document.getElementById('rul-maint')?.value)||1;
+  const adjLife = design * cond * maint;
+  const rul     = Math.max(0, adjLife - cur);
+  const daily   = parseFloat(document.getElementById('daily-hrs')?.value)||20;
+  const days    = Math.ceil(rul/daily);
+  const pct     = Math.min(100,(cur/adjLife)*100);
+  const el      = document.getElementById('rul-result');
+  el.innerHTML  = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px">
+      <div class="stat-tile"><div class="stat-label">Adjusted Life</div><div class="stat-value" style="font-size:18px">${adjLife.toLocaleString()}</div><div class="stat-sub">hours</div></div>
+      <div class="stat-tile"><div class="stat-label">Hours Used</div><div class="stat-value" style="font-size:18px;color:var(--warn)">${cur.toLocaleString()}</div><div class="stat-sub">${pct.toFixed(1)}% of life</div></div>
+      <div class="stat-tile"><div class="stat-label">RUL</div><div class="stat-value" style="font-size:18px;color:${rul<5000?'var(--fail)':'var(--pass)'}">${rul.toLocaleString()}</div><div class="stat-sub">hours remaining</div></div>
+      <div class="stat-tile"><div class="stat-label">Est. Overhaul</div><div class="stat-value" style="font-size:16px">${new Date(Date.now()+days*86400000).getFullYear()}</div><div class="stat-sub">~${days.toLocaleString()} days</div></div>
+    </div>
+    <div style="background:var(--bg-raised);border-radius:6px;height:10px;margin-top:12px;overflow:hidden">
+      <div style="background:${pct>80?'var(--fail)':pct>60?'var(--warn)':'var(--teal)'};width:${pct}%;height:10px;border-radius:6px;transition:width .5s"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${pct.toFixed(1)}% of adjusted useful life consumed</div>`;
+}
+
+function addHoursEntry() {
+  const entry = {
+    date:  new Date().toISOString().slice(0,10),
+    start: parseFloat(document.getElementById('cur-hours')?.value)||0,
+    stop:  0, run:0, rem:''
+  };
+  hoursLog.push(entry);
+  EP.save('pred-hours', hoursLog);
+  renderHoursLog();
+}
+
+function renderHoursLog() {
+  document.getElementById('hours-log-body').innerHTML = hoursLog.map((r,i)=>`<tr>
+    <td><input type="date" value="${r.date}" onchange="hoursLog[${i}].date=this.value;EP.save('pred-hours',hoursLog)" style="width:130px"/></td>
+    <td><input type="number" value="${r.start}" onchange="hoursLog[${i}].start=+this.value;calcRun(${i})" style="width:90px"/></td>
+    <td><input type="number" value="${r.stop||''}"  onchange="hoursLog[${i}].stop=+this.value;calcRun(${i})" style="width:90px"/></td>
+    <td style="font-family:'Roboto Mono',monospace;color:var(--teal-br)" id="hl-run-${i}">${r.run||'—'}</td>
+    <td><input type="text" value="${r.rem||''}" onchange="hoursLog[${i}].rem=this.value;EP.save('pred-hours',hoursLog)" placeholder="Remarks"/></td>
+    <td class="no-print"><button onclick="hoursLog.splice(${i},1);EP.save('pred-hours',hoursLog);renderHoursLog()" style="background:none;border:none;cursor:pointer;color:var(--fail)">✕</button></td>
+  </tr>`).join('');
+}
+function calcRun(i) {
+  hoursLog[i].run = (hoursLog[i].stop - hoursLog[i].start).toFixed(2);
+  EP.save('pred-hours', hoursLog);
+  document.getElementById(`hl-run-${i}`).textContent = hoursLog[i].run;
+}
+
+function addPerfEntry() {
+  const get = id => document.getElementById(id)?.value||'';
+  perfLog.push({
+    date:get('pt-date'), hrs:get('pt-hrs'), rpm:get('pt-rpm'), pwr:get('pt-pwr'),
+    sfoc:get('pt-sfoc'), exh:get('pt-exh'), loc:get('pt-loc'), vib:get('pt-vib'), rem:get('pt-rem'),
+  });
+  EP.save('pred-perf', perfLog);
+  renderPerfLog();
+  renderPerfCharts();
+  ['pt-rpm','pt-pwr','pt-sfoc','pt-exh','pt-loc','pt-vib','pt-rem'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+function renderPerfLog() {
+  document.getElementById('perf-log-body').innerHTML = perfLog.map((r,i)=>`<tr>
+    <td>${r.date||'—'}</td><td>${r.hrs||'—'}</td><td>${r.rpm||'—'}</td><td>${r.pwr||'—'}</td>
+    <td style="color:var(--teal-br)">${r.sfoc||'—'}</td><td>${r.exh||'—'}</td>
+    <td>${r.loc||'—'}</td><td>${r.vib||'—'}</td>
+    <td>${r.rem||''}</td>
+    <td class="no-print"><button onclick="perfLog.splice(${i},1);EP.save('pred-perf',perfLog);renderPerfLog();renderPerfCharts()" style="background:none;border:none;cursor:pointer;color:var(--fail)">✕</button></td>
+  </tr>`).join('');
+}
+
+const charts = {};
+function makeChart(id, label, color, data, labels) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id)?.getContext('2d');
+  if (!ctx) return;
+  charts[id] = new Chart(ctx,{
+    type:'line',
+    data:{labels, datasets:[{label, data, borderColor:color, backgroundColor:color+'22', fill:true, tension:.3, pointRadius:3}]},
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:'#7ACFCF',font:{family:'Roboto',size:11}}}},
+      scales:{
+        y:{grid:{color:'rgba(10,150,150,0.1)'},ticks:{color:'#7ACFCF'}},
+        x:{grid:{color:'rgba(10,150,150,0.1)'},ticks:{color:'#7ACFCF',maxTicksLimit:8}},
+      }
+    }
+  });
+}
+
+function renderPerfCharts() {
+  if (!perfLog.length) return;
+  const labels = perfLog.map(r=>r.date||r.hrs||'');
+  makeChart('sfoc-chart', 'SFOC g/kWh', '#0DC8C8', perfLog.map(r=>parseFloat(r.sfoc)||null), labels);
+  makeChart('exh-chart',  'Exh Avg °C', '#f59e0b', perfLog.map(r=>parseFloat(r.exh)||null),  labels);
+  makeChart('lo-chart',   'LO L/day',   '#818cf8', perfLog.map(r=>parseFloat(r.loc)||null),  labels);
+  makeChart('vib-chart',  'Vibration',  '#ef4444', perfLog.map(r=>parseFloat(r.vib)||null),  labels);
+}
+
+function savePred() { EP.save('pred-perf',perfLog); EP.save('pred-hours',hoursLog); toast('Predictive data saved','pass'); }
+function markDone() { savePred(); setModuleStatus('predictive','done'); toast('Predictive marked complete ✓','pass'); }
+
+function exportPredExcel() {
+  exportExcel([
+    {name:'Performance Log', data:perfLog.map(r=>({Date:r.date,Hours:r.hrs,RPM:r.rpm,'kW':r.pwr,'SFOC':r.sfoc,'Exh°C':r.exh,'LO L/d':r.loc,'Vib':r.vib,Remarks:r.rem}))},
+    {name:'Hours Log', data:hoursLog.map(r=>({Date:r.date,Start:r.start,Stop:r.stop,Run:r.run,Remarks:r.rem}))},
+  ],`Predictive_${getProject().vesselName||'vessel'}.xlsx`);
+}
+
+// Init
+renderHoursLog();
+renderPerfLog();
+renderPerfCharts();
+updateSchedule();
+document.getElementById('cur-hours')?.addEventListener('input', updateSchedule);
+document.getElementById('daily-hrs')?.addEventListener('input', updateSchedule);
+</script>
+</body>
+</html>

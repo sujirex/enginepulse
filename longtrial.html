@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — Long Trial</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="navbar"></div>
+<div class="page">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> › Long Trial</div>
+  <div class="page-header">
+    <div class="page-title">⏱️ Long Trial / Endurance Run</div>
+    <div class="page-sub">Continuous run at rated load · Periodic readings · Live trend chart · Certificate</div>
+  </div>
+  <div id="vessel-strip"></div>
+
+  <!-- Setup -->
+  <div class="section">
+    <div class="section-title">A. Trial Setup</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Trial Duration</label>
+          <select id="lt-duration" onchange="updateSchedule()">
+            <option value="4">4 Hours</option>
+            <option value="6">6 Hours</option>
+            <option value="8">8 Hours</option>
+            <option value="12">12 Hours</option>
+            <option value="24">24 Hours</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Reading Interval</label>
+          <select id="lt-interval" onchange="updateSchedule()">
+            <option value="30">Every 30 min</option>
+            <option value="60">Every 60 min</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Target Load</label>
+          <select id="lt-load"><option>100% MCR</option><option>90% MCR (NCR)</option><option>85% MCR</option><option>75% MCR</option><option>110% (Overload)</option></select>
+        </div>
+        <div class="form-group"><label>Start Date & Time</label>
+          <input type="datetime-local" id="lt-start-dt"/>
+        </div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Target RPM</label><input type="number" id="lt-target-rpm" placeholder="105"/></div>
+        <div class="form-group"><label>Target Power (kW)</label><input type="number" id="lt-target-pwr" placeholder="8000"/></div>
+        <div class="form-group"><label>Max LO Temp Limit (°C)</label><input type="number" id="lt-lo-limit" value="80" placeholder="80"/></div>
+        <div class="form-group"><label>Max Exh Temp Limit (°C)</label><input type="number" id="lt-exh-limit" value="450" placeholder="450"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="section">
+    <div class="section-title">B. Trial Progress</div>
+    <div class="grid-4">
+      <div class="stat-tile"><div class="stat-label">Elapsed</div><div class="stat-value" id="lt-elapsed">0h 0m</div></div>
+      <div class="stat-tile"><div class="stat-label">Readings Taken</div><div class="stat-value" id="lt-count">0</div></div>
+      <div class="stat-tile"><div class="stat-label">Avg RPM</div><div class="stat-value" id="lt-avg-rpm">—</div></div>
+      <div class="stat-tile"><div class="stat-label">Avg Power</div><div class="stat-value" id="lt-avg-pwr">—</div><div class="stat-sub">kW</div></div>
+    </div>
+  </div>
+
+  <!-- Quick Entry -->
+  <div class="section">
+    <div class="section-title">C. Quick Reading Entry</div>
+    <div class="callout">Fill in the current readings and click <strong>Add Reading</strong>. Time is auto-stamped.</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Time (auto)</label><input type="datetime-local" id="qe-time"/></div>
+        <div class="form-group"><label>RPM</label><input type="number" id="qe-rpm" placeholder=""/></div>
+        <div class="form-group"><label>Power (kW)</label><input type="number" id="qe-pwr" placeholder=""/></div>
+        <div class="form-group"><label>Speed (knots)</label><input type="number" id="qe-spd" step="0.1" placeholder=""/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Fuel Flow (kg/h)</label><input type="number" id="qe-fuel" step="0.1" placeholder=""/></div>
+        <div class="form-group"><label>Exh Avg (°C)</label><input type="number" id="qe-exh" placeholder=""/></div>
+        <div class="form-group"><label>LO Press (bar)</label><input type="number" id="qe-lop" step="0.1" placeholder=""/></div>
+        <div class="form-group"><label>LO Temp (°C)</label><input type="number" id="qe-lot" placeholder=""/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Coolant Temp (°C)</label><input type="number" id="qe-cool" placeholder=""/></div>
+        <div class="form-group"><label>T/C In (°C)</label><input type="number" id="qe-tcin" placeholder=""/></div>
+        <div class="form-group"><label>T/C Out (°C)</label><input type="number" id="qe-tcout" placeholder=""/></div>
+        <div class="form-group"><label>Charge Air (bar)</label><input type="number" id="qe-ca" step="0.01" placeholder=""/></div>
+      </div>
+      <div class="form-group"><label>Remarks</label><input type="text" id="qe-rem" placeholder="Any observations..."/></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="addReading()">+ Add Reading</button>
+        <button class="btn btn-outline" onclick="autoStamp()">🕐 Stamp Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Readings Log Table -->
+  <div class="section">
+    <div class="section-title">D. Readings Log</div>
+    <div class="card" style="padding:0">
+      <div class="table-wrap">
+        <table id="log-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Date/Time</th><th>RPM</th><th>kW</th><th>kn</th>
+              <th>Fuel kg/h</th><th>Exh°C</th><th>LO bar</th><th>LO°C</th>
+              <th>Cool°C</th><th>T/C In</th><th>T/C Out</th><th>CA bar</th>
+              <th>Alarm</th><th>Remarks</th><th class="no-print"></th>
+            </tr>
+          </thead>
+          <tbody id="log-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="section">
+    <div class="section-title">E. Trend Chart</div>
+    <div class="chart-box"><canvas id="lt-chart" height="100"></canvas></div>
+  </div>
+
+  <!-- Summary -->
+  <div class="section">
+    <div class="section-title">F. Trial Summary Statistics</div>
+    <div id="summary-grid" class="grid-4"></div>
+  </div>
+
+  <!-- Overall -->
+  <div class="section">
+    <div class="section-title">G. Trial Result & Certificate</div>
+    <div class="card">
+      <div class="form-row col-2">
+        <div><label>Overall Result</label>
+          <div style="margin-top:6px">
+            <label style="margin-right:8px;display:inline-flex;align-items:center;gap:5px"><input type="radio" name="lt-result" value="pass"/> <span class="badge badge-pass">Satisfactory</span></label>
+            <label style="display:inline-flex;align-items:center;gap:5px"><input type="radio" name="lt-result" value="fail"/> <span class="badge badge-fail">Unsatisfactory</span></label>
+          </div>
+        </div>
+        <div class="form-group"><label>Completion Date & Time</label><input type="datetime-local" id="lt-completionDt"/></div>
+      </div>
+      <div class="form-group" style="margin-top:10px"><label>Remarks</label><textarea id="lt-remarks" placeholder="Summary observations..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="saveAll()">💾 Save</button>
+    <button class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
+    <button class="btn btn-outline" onclick="exportLTExcel()">📊 Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print / Certificate</button>
+    <button class="btn btn-danger" onclick="clearReadings()">🗑️ Clear Readings</button>
+    <a href="signoff.html" class="btn btn-outline">✍️ Sign-off</a>
+  </div>
+</div>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+buildNavbar('longtrial');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+
+let readings = EP.load('lt-readings', []);
+let ltChart;
+
+function autoStamp() {
+  document.getElementById('qe-time').value = nowISO();
+}
+
+function addReading() {
+  const get = id => document.getElementById(id)?.value||'';
+  const row = {
+    ts:   get('qe-time') || nowISO(),
+    rpm:  get('qe-rpm'),  pwr:  get('qe-pwr'),  spd:  get('qe-spd'),
+    fuel: get('qe-fuel'), exh:  get('qe-exh'),  lop:  get('qe-lop'),
+    lot:  get('qe-lot'),  cool: get('qe-cool'), tcin: get('qe-tcin'),
+    tcout:get('qe-tcout'),ca:   get('qe-ca'),   rem:  get('qe-rem'),
+  };
+  // Alarm check
+  const loLimit  = parseFloat(document.getElementById('lt-lo-limit')?.value)||80;
+  const exhLimit = parseFloat(document.getElementById('lt-exh-limit')?.value)||450;
+  row.alarm = '';
+  if (parseFloat(row.lot) > loLimit)  row.alarm += 'HIGH LO TEMP ';
+  if (parseFloat(row.exh) > exhLimit) row.alarm += 'HIGH EXH TEMP ';
+  if (row.alarm) toast('⚠️ ALARM: ' + row.alarm.trim(), 'warn');
+
+  readings.push(row);
+  EP.save('lt-readings', readings);
+  renderLog();
+  renderChart();
+  renderSummary();
+  updateProgress();
+  // Clear quick entry except time
+  ['qe-rpm','qe-pwr','qe-spd','qe-fuel','qe-exh','qe-lop','qe-lot','qe-cool','qe-tcin','qe-tcout','qe-ca','qe-rem'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  autoStamp();
+}
+
+function renderLog() {
+  document.getElementById('log-body').innerHTML = readings.map((r,i) => `<tr>
+    <td>${i+1}</td>
+    <td style="white-space:nowrap;font-family:'Roboto Mono',monospace;font-size:11px">${fmtDatetime(r.ts)}</td>
+    <td>${r.rpm}</td><td>${r.pwr}</td><td>${r.spd}</td>
+    <td>${r.fuel}</td>
+    <td style="${parseFloat(r.exh)>450?'color:var(--fail);font-weight:700':''}">${r.exh}</td>
+    <td>${r.lop}</td>
+    <td style="${parseFloat(r.lot)>80?'color:var(--fail);font-weight:700':''}">${r.lot}</td>
+    <td>${r.cool}</td><td>${r.tcin}</td><td>${r.tcout}</td><td>${r.ca}</td>
+    <td>${r.alarm ? `<span class="badge badge-fail">${r.alarm}</span>` : ''}</td>
+    <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.rem||''}</td>
+    <td class="no-print"><button onclick="deleteReading(${i})" style="background:none;border:none;cursor:pointer;color:var(--fail)">✕</button></td>
+  </tr>`).join('');
+  document.getElementById('lt-count').textContent = readings.length;
+}
+
+function deleteReading(i) {
+  readings.splice(i,1);
+  EP.save('lt-readings', readings);
+  renderLog(); renderChart(); renderSummary(); updateProgress();
+}
+
+function avg(arr) {
+  const nums = arr.filter(v=>v!==''&&!isNaN(parseFloat(v))).map(Number);
+  return nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1) : '—';
+}
+function maxVal(arr) {
+  const nums = arr.filter(v=>v!==''&&!isNaN(parseFloat(v))).map(Number);
+  return nums.length ? Math.max(...nums).toFixed(1) : '—';
+}
+function minVal(arr) {
+  const nums = arr.filter(v=>v!==''&&!isNaN(parseFloat(v))).map(Number);
+  return nums.length ? Math.min(...nums).toFixed(1) : '—';
+}
+
+function renderSummary() {
+  if (!readings.length) { document.getElementById('summary-grid').innerHTML=''; return; }
+  const params = [
+    { label:'Avg RPM',         val:avg(readings.map(r=>r.rpm)) },
+    { label:'Avg Power (kW)',  val:avg(readings.map(r=>r.pwr)) },
+    { label:'Max LO Temp (°C)',val:maxVal(readings.map(r=>r.lot)), warn: v=>parseFloat(v)>80 },
+    { label:'Max Exh (°C)',    val:maxVal(readings.map(r=>r.exh)), warn: v=>parseFloat(v)>450 },
+    { label:'Min LO Press',    val:minVal(readings.map(r=>r.lop)), warn: v=>parseFloat(v)<2 },
+    { label:'Avg Coolant (°C)',val:avg(readings.map(r=>r.cool)) },
+    { label:'Avg Fuel (kg/h)', val:avg(readings.map(r=>r.fuel)) },
+    { label:'Avg Speed (kn)',  val:avg(readings.map(r=>r.spd)) },
+  ];
+  document.getElementById('summary-grid').innerHTML = params.map(p=>`
+    <div class="stat-tile">
+      <div class="stat-label">${p.label}</div>
+      <div class="stat-value" style="${p.warn&&p.warn(p.val)?'color:var(--fail)':''}">${p.val}</div>
+    </div>`).join('');
+}
+
+function updateProgress() {
+  if (!readings.length) return;
+  const first = new Date(readings[0]?.ts);
+  const last  = new Date(readings[readings.length-1]?.ts);
+  const diff  = (last - first) / 60000;
+  const hrs   = Math.floor(diff/60), mins = Math.round(diff%60);
+  document.getElementById('lt-elapsed').textContent = `${hrs}h ${mins}m`;
+  document.getElementById('lt-avg-rpm').textContent = avg(readings.map(r=>r.rpm));
+  document.getElementById('lt-avg-pwr').textContent = avg(readings.map(r=>r.pwr));
+}
+
+function renderChart() {
+  if (!readings.length) return;
+  const labels = readings.map((_,i)=>`R${i+1}`);
+  const rpms  = readings.map(r=>parseFloat(r.rpm)||null);
+  const pwrs  = readings.map(r=>parseFloat(r.pwr)||null);
+  const exhs  = readings.map(r=>parseFloat(r.exh)||null);
+  const lots  = readings.map(r=>parseFloat(r.lot)||null);
+  if (ltChart) ltChart.destroy();
+  const ctx = document.getElementById('lt-chart').getContext('2d');
+  ltChart = new Chart(ctx,{
+    data:{labels, datasets:[
+      {type:'line',label:'RPM',  data:rpms,  borderColor:'#0DC8C8',tension:.3,yAxisID:'y',  fill:false,pointRadius:3},
+      {type:'line',label:'kW',   data:pwrs,  borderColor:'#818cf8',tension:.3,yAxisID:'y',  fill:false,pointRadius:3},
+      {type:'line',label:'Exh°C',data:exhs,  borderColor:'#f59e0b',tension:.3,yAxisID:'y2', fill:false,pointRadius:3},
+      {type:'line',label:'LO°C', data:lots,  borderColor:'#ef4444',tension:.3,yAxisID:'y2', fill:false,pointRadius:3},
+    ]},
+    options:{
+      responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{color:'#7ACFCF',font:{family:'Roboto',size:11}}}},
+      scales:{
+        y:  {grid:{color:'rgba(10,150,150,0.1)'},ticks:{color:'#7ACFCF'},title:{display:true,text:'RPM / kW',color:'#7ACFCF'}},
+        y2: {position:'right',grid:{drawOnChartArea:false},ticks:{color:'#7ACFCF'},title:{display:true,text:'Temperature °C',color:'#7ACFCF'}},
+        x:  {grid:{color:'rgba(10,150,150,0.1)'},ticks:{color:'#7ACFCF'}},
+      }
+    }
+  });
+}
+
+function updateSchedule() {}
+
+function saveAll() { EP.save('lt-readings', readings); toast('Long trial data saved','pass'); }
+function markDone() { saveAll(); setModuleStatus('longtrial','done'); toast('Long Trial marked complete ✓','pass'); }
+function clearReadings() {
+  if (!confirm('Clear all readings?')) return;
+  readings = []; EP.save('lt-readings',[]);
+  renderLog(); renderChart(); renderSummary(); updateProgress();
+  document.getElementById('lt-elapsed').textContent='0h 0m';
+  document.getElementById('lt-count').textContent='0';
+}
+
+function exportLTExcel() {
+  const data = readings.map((r,i)=>({
+    '#':i+1,'Date/Time':r.ts,'RPM':r.rpm,'Power(kW)':r.pwr,'Speed(kn)':r.spd,
+    'Fuel(kg/h)':r.fuel,'Exh(°C)':r.exh,'LO Press(bar)':r.lop,'LO Temp(°C)':r.lot,
+    'Coolant(°C)':r.cool,'T/C In':r.tcin,'T/C Out':r.tcout,'CA(bar)':r.ca,
+    'Alarm':r.alarm,'Remarks':r.rem,
+  }));
+  exportExcel([{name:'Long Trial Log', data}],`LongTrial_${getProject().vesselName||'vessel'}.xlsx`);
+}
+
+// Init
+renderLog(); renderChart(); renderSummary(); updateProgress();
+autoStamp();
+</script>
+</body>
+</html>

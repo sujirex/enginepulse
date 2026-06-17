@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — Sea Trial</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="navbar"></div>
+<div class="page">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> › Sea Trial</div>
+  <div class="page-header">
+    <div class="page-title">🚢 Sea Trial</div>
+    <div class="page-sub">Speed trial · Crash stop · Maneuvering · Performance table · Fuel consumption</div>
+  </div>
+  <div id="vessel-strip"></div>
+
+  <!-- Trial Conditions -->
+  <div class="section">
+    <div class="section-title">A. Trial Conditions</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Trial Date</label><input type="date" id="st-date"/></div>
+        <div class="form-group"><label>Trial Area / Location</label><input type="text" id="st-location" placeholder="Measured mile / open sea"/></div>
+        <div class="form-group"><label>Trial Start Time</label><input type="time" id="st-start"/></div>
+        <div class="form-group"><label>Trial End Time</label><input type="time" id="st-end"/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Displacement (tonnes)</label><input type="number" id="st-displacement" placeholder="5000"/></div>
+        <div class="form-group"><label>Mean Draught (m)</label><input type="number" id="st-draught" step="0.01" placeholder="5.50"/></div>
+        <div class="form-group"><label>Trim (m)</label><input type="number" id="st-trim" step="0.01" placeholder="0.00"/></div>
+        <div class="form-group"><label>Water Depth (m)</label><input type="number" id="st-depth" placeholder="100"/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Wind Speed (knots)</label><input type="number" id="st-wind" placeholder="5"/></div>
+        <div class="form-group"><label>Wind Direction</label><input type="text" id="st-winddir" placeholder="N / NE / 045°"/></div>
+        <div class="form-group"><label>Sea State (Beaufort)</label><select id="st-sea"><option>0 — Calm</option><option>1 — Light air</option><option>2 — Light breeze</option><option>3 — Gentle breeze</option><option>4 — Moderate breeze</option><option>5 — Fresh breeze</option></select></div>
+        <div class="form-group"><label>Current (knots)</label><input type="number" id="st-current" step="0.1" placeholder="0.5"/></div>
+      </div>
+      <div class="form-row col-3">
+        <div class="form-group"><label>Seawater Temp (°C)</label><input type="number" id="st-swtemp" placeholder="28"/></div>
+        <div class="form-group"><label>Ambient Air Temp (°C)</label><input type="number" id="st-airtemp" placeholder="32"/></div>
+        <div class="form-group"><label>Barometric Pressure (mbar)</label><input type="number" id="st-baro" placeholder="1013"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Speed Trial -->
+  <div class="section">
+    <div class="section-title">B. Speed Trial — Measured Mile</div>
+    <div class="callout">Mean speed is auto-calculated from multiple runs. Minimum 4 runs (2 each direction) required for a valid trial.</div>
+    <div class="card" style="padding:0">
+      <div class="table-wrap">
+        <table id="speed-table">
+          <thead>
+            <tr>
+              <th>Run</th><th>Direction</th><th>Time (mm:ss)</th><th>Distance (NM)</th>
+              <th>Speed (kn)*</th><th>RPM</th><th>Power (kW)</th><th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="speed-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+      <div class="stat-tile" style="flex:1;min-width:120px"><div class="stat-label">Mean Speed</div><div class="stat-value" id="mean-speed">—</div><div class="stat-sub">knots</div></div>
+      <div class="stat-tile" style="flex:1;min-width:120px"><div class="stat-label">Contract Speed</div><input type="number" id="contract-speed" placeholder="14.0" step="0.1" style="margin-top:4px;font-size:18px;font-weight:700"/></div>
+      <div class="stat-tile" style="flex:1;min-width:120px"><div class="stat-label">Speed Result</div><div class="stat-value" id="speed-result">—</div></div>
+    </div>
+  </div>
+
+  <!-- Performance Table -->
+  <div class="section">
+    <div class="section-title">C. Engine Performance Table (at each RPM step)</div>
+    <div class="callout">Record parameters at each RPM step during the endurance run. Cylinder exhaust temps are averaged.</div>
+    <div class="card" style="padding:0">
+      <div class="table-wrap">
+        <table id="perf-table">
+          <thead>
+            <tr>
+              <th>RPM</th><th>MCR%</th><th>Power(kW)</th><th>Speed(kn)</th>
+              <th>Fuel(kg/h)</th><th>SFOC*</th>
+              <th>T/C In(°C)</th><th>T/C Out(°C)</th>
+              <th>Exh Avg(°C)</th><th>Charge Air(bar)</th>
+              <th>LO Press(bar)</th><th>LO Temp(°C)</th><th>Cool Temp(°C)</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="perf-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crash Stop -->
+  <div class="section">
+    <div class="section-title">D. Crash Stop Test</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Initial Speed (knots)</label><input type="number" id="cs-speed" placeholder="14.0" step="0.1"/></div>
+        <div class="form-group"><label>Initial RPM (Full Ahead)</label><input type="number" id="cs-rpm-fa" placeholder="100"/></div>
+        <div class="form-group"><label>Time to Stop (min:sec)</label><input type="text" id="cs-time" placeholder="00:00"/></div>
+        <div class="form-group"><label>Distance to Stop (ship lengths)</label><input type="number" id="cs-dist" step="0.1" placeholder="6.5"/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Max Astern RPM</label><input type="number" id="cs-rpm-as" placeholder="65"/></div>
+        <div class="form-group"><label>Max LO Temp during Stop (°C)</label><input type="number" id="cs-lotemp" placeholder="85"/></div>
+        <div class="form-group"><label>Max Exhaust Temp (°C)</label><input type="number" id="cs-exhtemp" placeholder="420"/></div>
+        <div class="form-group"><label>Result</label>
+          <div style="margin-top:6px">
+            <label style="margin-right:8px;display:inline-flex;align-items:center;gap:5px"><input type="radio" name="cs-result" value="pass"/> <span class="badge badge-pass">Pass</span></label>
+            <label style="display:inline-flex;align-items:center;gap:5px"><input type="radio" name="cs-result" value="fail"/> <span class="badge badge-fail">Fail</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group"><label>Remarks</label><textarea id="cs-remarks" placeholder="Observations during crash stop..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Maneuvering -->
+  <div class="section">
+    <div class="section-title">E. Maneuvering Test</div>
+    <div class="card">
+      <div class="checklist" id="maneuver-list"></div>
+      <div class="form-row col-2" style="margin-top:14px">
+        <div class="form-group"><label>Turning Circle Diameter (m)</label><input type="number" id="tc-diameter" placeholder="450"/></div>
+        <div class="form-group"><label>Advance at 35° Rudder (ship lengths)</label><input type="number" id="tc-advance" step="0.1" placeholder="3.5"/></div>
+      </div>
+      <div class="form-group"><label>Maneuvering Remarks</label><textarea id="maneuver-remarks" placeholder="Steering response, rudder angles, time to alter course..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Fuel Consumption -->
+  <div class="section">
+    <div class="section-title">F. Fuel Consumption Trial</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Trial Duration (hrs)</label><input type="number" id="fc-duration" step="0.5" placeholder="4"/></div>
+        <div class="form-group"><label>Fuel Consumed (tonnes)</label><input type="number" id="fc-fuel" step="0.01" placeholder="" oninput="calcSFOC()"/></div>
+        <div class="form-group"><label>Average Power (kW)</label><input type="number" id="fc-power" placeholder="" oninput="calcSFOC()"/></div>
+        <div class="form-group"><label>SFOC (g/kWh)*</label><input type="number" id="fc-sfoc" readonly style="color:var(--teal-br);font-weight:700"/></div>
+      </div>
+      <div class="form-row col-3">
+        <div class="form-group"><label>Fuel Type</label><select id="fc-fueltype"><option>HFO</option><option>VLSFO</option><option>MGO</option><option>LNG</option></select></div>
+        <div class="form-group"><label>Fuel Density (kg/m³)</label><input type="number" id="fc-density" placeholder="991"/></div>
+        <div class="form-group"><label>Fuel Temp at Flow Meter (°C)</label><input type="number" id="fc-fueltemp" placeholder="40"/></div>
+      </div>
+      <div class="form-group"><label>Fuel Consumption Remarks</label><textarea id="fc-remarks" placeholder="Flow meter readings, any corrections applied..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Overall -->
+  <div class="section">
+    <div class="section-title">G. Overall Sea Trial Result</div>
+    <div class="card">
+      <div class="form-row col-2">
+        <div><label>Overall Result</label>
+          <div style="margin-top:6px">
+            <label style="margin-right:8px;display:inline-flex;align-items:center;gap:5px"><input type="radio" name="st-overall" value="pass"/> <span class="badge badge-pass">Satisfactory</span></label>
+            <label style="display:inline-flex;align-items:center;gap:5px"><input type="radio" name="st-overall" value="fail"/> <span class="badge badge-fail">Unsatisfactory</span></label>
+          </div>
+        </div>
+        <div class="form-group"><label>Completion Date & Time</label><input type="datetime-local" id="st-completionDt"/></div>
+      </div>
+      <div class="form-group" style="margin-top:10px"><label>Remarks / Deficiency List</label><textarea id="st-remarks" placeholder="Outstanding items, punch list, observations..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="saveST()">💾 Save</button>
+    <button class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
+    <button class="btn btn-outline" onclick="exportSTExcel()">📊 Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+    <a href="signoff.html" class="btn btn-outline">✍️ Go to Sign-off</a>
+  </div>
+</div>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+buildNavbar('seatrial');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+
+const MANEUVER = [
+  'Ahead — Dead slow, Slow, Half, Full ordered and verified',
+  'Astern — Dead slow, Slow, Half, Full ordered and verified',
+  'Bridge control of engine verified (all telegraph positions)',
+  'Engine room manual control verified',
+  'Steering gear — port and starboard to hard over (≤28 sec each)',
+  'Emergency steering from steering gear room verified',
+  'Anchor drop and recovery test',
+  'Bow thruster (if fitted) — full port and starboard thrust',
+  'Stern thruster (if fitted) — full port and starboard thrust',
+  'Stabilisers (if fitted) — deployed and retracted',
+];
+
+// Speed table
+function renderSpeedTable() {
+  const saved = EP.load('st-speed', []);
+  const tbody = document.getElementById('speed-body');
+  const RUNS = 6;
+  tbody.innerHTML = '';
+  for (let i=0; i<RUNS; i++) {
+    const r = saved[i]||{};
+    const dir = i%2===0 ? 'North/Port' : 'South/Stbd';
+    tbody.innerHTML += `<tr>
+      <td><strong>${i+1}</strong></td>
+      <td><input type="text" name="sp_dir_${i}" value="${r.dir||dir}" style="width:100px"/></td>
+      <td><input type="text" name="sp_time_${i}" value="${r.time||''}" placeholder="10:30" oninput="calcMeanSpeed()"/></td>
+      <td><input type="number" name="sp_dist_${i}" value="${r.dist||1}" step="0.001" oninput="calcMeanSpeed()"/></td>
+      <td style="color:var(--teal-br);font-family:'Roboto Mono',monospace;font-weight:600" id="sp_spd_${i}">—</td>
+      <td><input type="number" name="sp_rpm_${i}" value="${r.rpm||''}"/></td>
+      <td><input type="number" name="sp_pwr_${i}" value="${r.pwr||''}"/></td>
+      <td><input type="text" name="sp_rem_${i}" value="${r.rem||''}" placeholder=""/></td>
+    </tr>`;
+  }
+}
+
+function timeToMin(t) {
+  if (!t) return null;
+  const parts = t.split(':');
+  if (parts.length===2) return parseInt(parts[0])+(parseInt(parts[1])/60);
+  return parseFloat(t)||null;
+}
+
+function calcMeanSpeed() {
+  const speeds = [];
+  for (let i=0; i<6; i++) {
+    const time = document.querySelector(`[name="sp_time_${i}"]`)?.value;
+    const dist = parseFloat(document.querySelector(`[name="sp_dist_${i}"]`)?.value)||1;
+    const mins = timeToMin(time);
+    if (mins) {
+      const spd = (dist/mins)*60;
+      document.getElementById(`sp_spd_${i}`).textContent = spd.toFixed(2);
+      speeds.push(spd);
+    } else { document.getElementById(`sp_spd_${i}`).textContent = '—'; }
+  }
+  const mean = speeds.length ? speeds.reduce((a,b)=>a+b,0)/speeds.length : null;
+  document.getElementById('mean-speed').textContent = mean ? mean.toFixed(2) : '—';
+  const contract = parseFloat(document.getElementById('contract-speed')?.value)||0;
+  if (mean && contract) {
+    const pass = mean >= contract;
+    document.getElementById('speed-result').innerHTML = passFailBadge(pass, mean.toFixed(2)+' kn');
+  }
+}
+document.getElementById('contract-speed')?.addEventListener('input', calcMeanSpeed);
+
+// Performance table RPM steps
+function renderPerfTable() {
+  const saved = EP.load('st-perf', []);
+  const proj = getProject();
+  const mcr = parseFloat(proj.mcr)||0;
+  const ratedRpm = parseFloat(proj.ratedRpm)||0;
+  const STEPS = [50,60,70,75,80,85,90,95,100];
+  document.getElementById('perf-body').innerHTML = STEPS.map((pct,i) => {
+    const r = saved[i]||{};
+    const rpm = ratedRpm ? (ratedRpm*Math.cbrt(pct/100)).toFixed(0) : '';
+    return `<tr>
+      <td><input type="number" name="pf_rpm_${i}" value="${r.rpm||rpm}" oninput="calcSFOCRow(${i})"/></td>
+      <td style="color:var(--text-muted)">${pct}%</td>
+      <td><input type="number" name="pf_pwr_${i}" value="${r.pwr||''}" oninput="calcSFOCRow(${i})"/></td>
+      <td><input type="number" name="pf_spd_${i}" value="${r.spd||''}" step="0.1"/></td>
+      <td><input type="number" name="pf_fuel_${i}" value="${r.fuel||''}" step="0.1" oninput="calcSFOCRow(${i})"/></td>
+      <td style="color:var(--teal-br);font-family:'Roboto Mono',monospace;font-weight:600" id="sfoc_${i}">—</td>
+      <td><input type="number" name="pf_tcin_${i}"  value="${r.tcin||''}"/></td>
+      <td><input type="number" name="pf_tcout_${i}" value="${r.tcout||''}"/></td>
+      <td><input type="number" name="pf_exh_${i}"   value="${r.exh||''}"/></td>
+      <td><input type="number" name="pf_ca_${i}"    value="${r.ca||''}" step="0.01"/></td>
+      <td><input type="number" name="pf_lo_${i}"    value="${r.lo||''}" step="0.1"/></td>
+      <td><input type="number" name="pf_lot_${i}"   value="${r.lot||''}"/></td>
+      <td><input type="number" name="pf_cool_${i}"  value="${r.cool||''}"/></td>
+      <td><input type="text"  name="pf_rem_${i}"   value="${r.rem||''}"/></td>
+    </tr>`;
+  }).join('');
+}
+
+function calcSFOCRow(i) {
+  const pwr  = parseFloat(document.querySelector(`[name="pf_pwr_${i}"]`)?.value)||0;
+  const fuel = parseFloat(document.querySelector(`[name="pf_fuel_${i}"]`)?.value)||0;
+  const el   = document.getElementById(`sfoc_${i}`);
+  if (pwr && fuel) { el.textContent = (fuel*1000/pwr).toFixed(1); }
+  else el.textContent = '—';
+}
+
+function calcSFOC() {
+  const dur  = parseFloat(document.getElementById('fc-duration')?.value)||0;
+  const fuel = parseFloat(document.getElementById('fc-fuel')?.value)||0;  // tonnes
+  const pwr  = parseFloat(document.getElementById('fc-power')?.value)||0;
+  if (dur && fuel && pwr) {
+    const sfoc = (fuel*1e6)/(pwr*dur);
+    document.getElementById('fc-sfoc').value = sfoc.toFixed(1);
+  }
+}
+
+function renderChecklist(id, items, prefix) {
+  const saved = EP.load('st-form',{});
+  document.getElementById(id).innerHTML = items.map((item,i)=>{
+    const v=saved[`${prefix}_${i}`]||'';
+    return `<div class="check-item">
+      <span class="check-label">${i+1}. ${item}</span>
+      <div class="check-result">
+        <label class="r-pass"><input type="radio" name="${prefix}_${i}" value="pass" ${v==='pass'?'checked':''}/> <span>✓ OK</span></label>
+        <label class="r-fail"><input type="radio" name="${prefix}_${i}" value="fail" ${v==='fail'?'checked':''}/> <span>✗ Fail</span></label>
+        <label class="r-na"><input type="radio" name="${prefix}_${i}" value="na"   ${v==='na'?'checked':''}/> <span>N/A</span></label>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+renderSpeedTable();
+renderPerfTable();
+renderChecklist('maneuver-list', MANEUVER, 'mv');
+
+function saveST() { toast('Sea trial data saved','pass'); }
+function markDone() { saveST(); setModuleStatus('seatrial','done'); toast('Sea Trial marked complete ✓','pass'); }
+
+function exportSTExcel() {
+  const speedRows=[], perfRows=[];
+  for(let i=0;i<6;i++){
+    speedRows.push({
+      Run:i+1,
+      Direction: document.querySelector(`[name="sp_dir_${i}"]`)?.value||'',
+      'Time(mm:ss)': document.querySelector(`[name="sp_time_${i}"]`)?.value||'',
+      'Distance(NM)': document.querySelector(`[name="sp_dist_${i}"]`)?.value||'',
+      'Speed(kn)': document.getElementById(`sp_spd_${i}`)?.textContent||'',
+      RPM: document.querySelector(`[name="sp_rpm_${i}"]`)?.value||'',
+    });
+  }
+  for(let i=0;i<9;i++){
+    perfRows.push({
+      RPM: document.querySelector(`[name="pf_rpm_${i}"]`)?.value||'',
+      'Power(kW)': document.querySelector(`[name="pf_pwr_${i}"]`)?.value||'',
+      'Speed(kn)': document.querySelector(`[name="pf_spd_${i}"]`)?.value||'',
+      'Fuel(kg/h)': document.querySelector(`[name="pf_fuel_${i}"]`)?.value||'',
+      'SFOC(g/kWh)': document.getElementById(`sfoc_${i}`)?.textContent||'',
+    });
+  }
+  exportExcel([
+    {name:'Speed Trial', data:speedRows},
+    {name:'Performance Table', data:perfRows},
+  ],`SeaTrial_${getProject().vesselName||'vessel'}.xlsx`);
+}
+</script>
+</body>
+</html>

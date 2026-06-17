@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub">Set up your vessel/engine project and track all test modules</div>
+  </div>
+
+  <!-- Project Setup -->
+  <div class="section">
+    <div class="section-title">Project Setup</div>
+    <div class="card">
+      <form id="project-form">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Vessel Name</label><input type="text" name="vesselName" placeholder="MV Example"/></div>
+          <div class="form-group"><label>IMO Number</label><input type="text" name="imo" placeholder="9000000"/></div>
+          <div class="form-group"><label>Flag State</label><input type="text" name="flag" placeholder="India"/></div>
+        </div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>Class Society</label><input type="text" name="classSociety" placeholder="IRS / LR / DNV"/></div>
+          <div class="form-group"><label>Yard / Builder</label><input type="text" name="yard" placeholder="Yard name"/></div>
+          <div class="form-group"><label>Hull Number</label><input type="text" name="hullNo" placeholder="H-001"/></div>
+          <div class="form-group"><label>Build Year</label><input type="number" name="buildYear" placeholder="2024"/></div>
+        </div>
+
+        <div class="section-title" style="margin-top:4px">Main Engine</div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>Engine Maker</label><input type="text" name="engineMaker" placeholder="MAN / Wärtsilä"/></div>
+          <div class="form-group"><label>Engine Model</label><input type="text" name="engineModel" placeholder="6S50ME-C"/></div>
+          <div class="form-group"><label>Serial Number</label><input type="text" name="engineSerial" placeholder="Serial No."/></div>
+          <div class="form-group"><label>No. of Cylinders</label><input type="number" name="cylinders" placeholder="6"/></div>
+        </div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>MCR (kW)</label><input type="number" name="mcr" placeholder="8000"/></div>
+          <div class="form-group"><label>Rated RPM</label><input type="number" name="ratedRpm" placeholder="105"/></div>
+          <div class="form-group"><label>NCR (kW)</label><input type="number" name="ncr" placeholder="7200"/></div>
+          <div class="form-group"><label>Fuel Type</label><select name="fuelType"><option value="HFO">HFO</option><option value="VLSFO">VLSFO</option><option value="MGO">MGO</option><option value="LNG">LNG</option><option value="MDO">MDO</option></select></div>
+        </div>
+
+        <div class="section-title" style="margin-top:4px">Diesel Generator (D.G.)</div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>D.G. Maker</label><input type="text" name="dgMaker" placeholder="Caterpillar / Cummins"/></div>
+          <div class="form-group"><label>D.G. Model</label><input type="text" name="dgModel" placeholder="Model No."/></div>
+          <div class="form-group"><label>Rated kVA</label><input type="number" name="dgKva" placeholder="500"/></div>
+          <div class="form-group"><label>Rated kW</label><input type="number" name="dgKw" placeholder="400"/></div>
+        </div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>Voltage (V)</label><input type="number" name="dgVoltage" placeholder="440"/></div>
+          <div class="form-group"><label>Frequency (Hz)</label><select name="dgFreq"><option value="50">50 Hz</option><option value="60">60 Hz</option></select></div>
+          <div class="form-group"><label>Power Factor</label><input type="number" name="dgPf" placeholder="0.8" step="0.01"/></div>
+          <div class="form-group"><label>No. of D.G. Sets</label><input type="number" name="dgCount" placeholder="3"/></div>
+        </div>
+
+        <div class="section-title" style="margin-top:4px">Survey Details</div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Surveyor Name</label><input type="text" name="surveyorName" placeholder="Surveyor full name"/></div>
+          <div class="form-group"><label>Certificate / Badge No.</label><input type="text" name="surveyorCert" placeholder="Cert number"/></div>
+          <div class="form-group"><label>Survey Date</label><input type="date" name="surveyDate"/></div>
+        </div>
+        <div class="form-row col-2">
+          <div class="form-group"><label>Survey Location / Port</label><input type="text" name="surveyLocation" placeholder="Mumbai / Yard"/></div>
+          <div class="form-group"><label>Survey Type</label><select name="surveyType"><option>Commissioning Survey</option><option>Annual Survey</option><option>Special Survey</option><option>Sea Trial Survey</option><option>Dry Dock Survey</option></select></div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" onclick="saveProj()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Project
+          </button>
+          <button type="button" class="btn btn-outline" onclick="clearProj()">Clear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Vessel strip -->
+  <div id="vessel-strip"></div>
+
+  <!-- Module Overview -->
+  <div class="section">
+    <div class="section-title">Test Modules</div>
+    <div class="grid-3" id="module-grid"></div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="section">
+    <div class="section-title">Progress Overview</div>
+    <div class="grid-4" id="stats-row"></div>
+  </div>
+
+</div>
+
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse v1.0 &nbsp;·&nbsp; <a href="guide.html">User Guide</a></footer>
+
+<script src="js/common.js"></script>
+<script>
+buildNavbar('dashboard');
+
+const MODULES = [
+  { key:'commissioning', icon:'🔧', title:'Commissioning',     href:'commissioning.html', desc:'Pre-start checklists, safety device trips, alarm tests, first fire record' },
+  { key:'dgtest',        icon:'⚡', title:'D.G. Load Test',    href:'dgtest.html',        desc:'Step load 0–110%, voltage/freq regulation, parallel ops, pass/fail' },
+  { key:'seatrial',      icon:'🚢', title:'Sea Trial',         href:'seatrial.html',      desc:'Speed trial, crash stop, maneuvering, fuel consumption, endurance run' },
+  { key:'longtrial',     icon:'⏱️', title:'Long Trial',        href:'longtrial.html',     desc:'4/8/12-hr endurance, periodic readings, live trend chart' },
+  { key:'predictive',    icon:'🔮', title:'Predictive',        href:'predictive.html',    desc:'Running hours, maintenance schedule, performance trends, RUL estimator' },
+  { key:'signoff',       icon:'✍️', title:'Surveyor Sign-off', href:'signoff.html',       desc:'Digital signature, stamp, witness, generate class-ready signed PDF' },
+];
+
+function renderModules() {
+  const grid = document.getElementById('module-grid');
+  grid.innerHTML = MODULES.map(m => {
+    const status = getModuleStatus(m.key);
+    return `<a class="module-card status-${status}" href="${m.href}">
+      <div class="mc-icon">${m.icon}</div>
+      <div class="mc-title">${m.title}</div>
+      <div class="mc-desc">${m.desc}</div>
+      ${statusDot(status)}
+    </a>`;
+  }).join('');
+}
+
+function renderStats() {
+  const statuses = MODULES.map(m => getModuleStatus(m.key));
+  const done    = statuses.filter(s => s === 'done' || s === 'signed').length;
+  const signed  = statuses.filter(s => s === 'signed').length;
+  const wip     = statuses.filter(s => s === 'wip').length;
+  const pending = statuses.filter(s => s === 'pending').length;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-tile"><div class="stat-label">Total Modules</div><div class="stat-value">${MODULES.length}</div></div>
+    <div class="stat-tile"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--pass)">${done}</div></div>
+    <div class="stat-tile"><div class="stat-label">Signed Off</div><div class="stat-value" style="color:var(--teal-br)">${signed}</div></div>
+    <div class="stat-tile"><div class="stat-label">In Progress</div><div class="stat-value" style="color:var(--warn)">${wip}</div></div>
+  `;
+}
+
+function saveProj() {
+  const form = document.getElementById('project-form');
+  const data = {};
+  new FormData(form).forEach((v,k) => data[k]=v);
+  saveProject(data);
+  document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+  buildNavbar('dashboard');
+  toast('Project saved', 'pass');
+}
+
+function clearProj() {
+  if (!confirm('Clear all project data?')) return;
+  EP.remove('project');
+  document.getElementById('project-form').reset();
+  document.getElementById('vessel-strip').innerHTML = '';
+  toast('Project cleared');
+}
+
+// Boot
+autoSaveForm('project-form', 'project');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+renderModules();
+renderStats();
+</script>
+</body>
+</html>

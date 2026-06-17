@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — D.G. Load Test</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .pf-row { display:flex; gap:16px; flex-wrap:wrap; margin-top:6px; }
+    .pf-tile { background:var(--bg-raised); border:1px solid var(--border); border-radius:8px; padding:10px 14px; flex:1; min-width:130px; }
+    .pf-label { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; }
+    .pf-val   { font-size:20px; font-weight:700; font-family:'Roboto Mono',monospace; color:var(--teal-br); }
+    .pf-status { margin-top:4px; }
+    td.calc { background:rgba(13,200,200,0.04); color:var(--teal-br); font-family:'Roboto Mono',monospace; font-weight:600; }
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+<div class="page">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> › D.G. Load Test</div>
+  <div class="page-header">
+    <div class="page-title">⚡ D.G. Load Test</div>
+    <div class="page-sub">Step load 0 → 110% · Auto voltage / frequency regulation · Pass / Fail vs class limits</div>
+  </div>
+  <div id="vessel-strip"></div>
+
+  <!-- D.G. Details -->
+  <div class="section">
+    <div class="section-title">Generator Details</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>D.G. Set No.</label><select id="dg-set"><option>D.G. No.1</option><option>D.G. No.2</option><option>D.G. No.3</option><option>Emergency D.G.</option></select></div>
+        <div class="form-group"><label>Test Date</label><input type="date" id="dg-date"/></div>
+        <div class="form-group"><label>Test Location</label><input type="text" id="dg-location" placeholder="Yard / Port"/></div>
+        <div class="form-group"><label>Ambient Temp (°C)</label><input type="number" id="dg-ambient" placeholder="30"/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Rated kVA</label><input type="number" id="rated-kva" placeholder="500" oninput="updateRated()"/></div>
+        <div class="form-group"><label>Rated kW</label><input type="number" id="rated-kw" placeholder="400" oninput="updateRated()"/></div>
+        <div class="form-group"><label>Rated Voltage (V)</label><input type="number" id="rated-v" placeholder="440" oninput="updateRated()"/></div>
+        <div class="form-group"><label>Rated Frequency (Hz)</label><select id="rated-hz" oninput="updateRated()"><option value="50">50 Hz</option><option value="60">60 Hz</option></select></div>
+      </div>
+      <div class="form-row col-3">
+        <div class="form-group"><label>Rated PF</label><input type="number" id="rated-pf" placeholder="0.8" step="0.01"/></div>
+        <div class="form-group"><label>Rated RPM</label><input type="number" id="rated-rpm" placeholder="1500"/></div>
+        <div class="form-group"><label>Load Bank Type</label><select id="load-type"><option>Resistive</option><option>Resistive-Inductive</option><option>Ship Service Load</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step Load Table -->
+  <div class="section">
+    <div class="section-title">Step Load Test</div>
+    <div class="callout">Enter readings at each load step. Auto-calculated columns (kVA, Regulation %) are shown in teal.</div>
+    <div class="card" style="padding:0">
+      <div class="table-wrap">
+        <table id="load-table">
+          <thead>
+            <tr>
+              <th rowspan="2">Step</th>
+              <th rowspan="2">Load %</th>
+              <th rowspan="2">Duration<br/>(min)</th>
+              <th colspan="5" style="text-align:center;border-bottom:1px solid var(--border)">Electrical</th>
+              <th colspan="4" style="text-align:center;border-bottom:1px solid var(--border)">Engine</th>
+              <th rowspan="2">Result</th>
+            </tr>
+            <tr>
+              <th>kW</th><th>kVAR</th><th>kVA*</th><th>PF*</th>
+              <th>V(L-L)</th><th>Hz</th><th>RPM</th>
+              <th>Exh°C</th><th>LO bar</th><th>Cool°C</th>
+            </tr>
+          </thead>
+          <tbody id="load-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Regulation Results -->
+  <div class="section">
+    <div class="section-title">Regulation Results (Auto-calculated)</div>
+    <div class="pf-row" id="reg-tiles">
+      <div class="pf-tile"><div class="pf-label">Voltage Regulation</div><div class="pf-val" id="vreg-val">—</div><div class="pf-status" id="vreg-badge"></div><div style="font-size:10px;color:var(--text-dim)">Limit: ≤ ±5%</div></div>
+      <div class="pf-tile"><div class="pf-label">Frequency Regulation</div><div class="pf-val" id="freg-val">—</div><div class="pf-status" id="freg-badge"></div><div style="font-size:10px;color:var(--text-dim)">Limit: ≤ ±5%</div></div>
+      <div class="pf-tile"><div class="pf-label">No-Load kVA</div><div class="pf-val" id="nl-kva">—</div></div>
+      <div class="pf-tile"><div class="pf-label">Full Load kVA</div><div class="pf-val" id="fl-kva">—</div></div>
+      <div class="pf-tile"><div class="pf-label">110% Overload</div><div class="pf-val" id="ol-kva">—</div><div class="pf-status" id="ol-badge"></div></div>
+    </div>
+  </div>
+
+  <!-- Parallel Operation -->
+  <div class="section">
+    <div class="section-title">Parallel Operation Test</div>
+    <div class="card">
+      <div class="checklist" id="parallel-list"></div>
+      <div class="form-row col-2" style="margin-top:14px">
+        <div class="form-group"><label>Remarks</label><textarea id="parallel-remarks" placeholder="Load sharing, synchronising observations..."></textarea></div>
+        <div class="form-group"><label>Result</label>
+          <div style="margin-top:6px">
+            <label style="display:inline-flex;align-items:center;gap:5px;margin-right:10px"><input type="radio" name="parallel-result" value="pass"/> <span class="badge badge-pass">Pass</span></label>
+            <label style="display:inline-flex;align-items:center;gap:5px"><input type="radio" name="parallel-result" value="fail"/> <span class="badge badge-fail">Fail</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Tests -->
+  <div class="section">
+    <div class="section-title">Additional Tests</div>
+    <div class="card">
+      <div class="checklist" id="addl-list"></div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="section">
+    <div class="section-title">Load Test Chart</div>
+    <div class="chart-box"><canvas id="dg-chart" height="80"></canvas></div>
+  </div>
+
+  <!-- Overall -->
+  <div class="section">
+    <div class="section-title">Overall D.G. Test Result</div>
+    <div class="card">
+      <div class="form-row col-2">
+        <div>
+          <label style="margin-bottom:6px">Overall Result</label><br>
+          <label style="display:inline-flex;align-items:center;gap:5px;margin-right:10px"><input type="radio" name="dg-overall" value="pass"/> <span class="badge badge-pass">Satisfactory</span></label>
+          <label style="display:inline-flex;align-items:center;gap:5px"><input type="radio" name="dg-overall" value="fail"/> <span class="badge badge-fail">Unsatisfactory</span></label>
+        </div>
+        <div class="form-group"><label>Completion Date & Time</label><input type="datetime-local" id="dg-completionDt"/></div>
+      </div>
+      <div class="form-group" style="margin-top:10px"><label>Remarks</label><textarea id="dg-remarks" placeholder="Observations, deficiencies, outstanding items..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="saveDG()">💾 Save</button>
+    <button class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
+    <button class="btn btn-outline" onclick="exportDGExcel()">📊 Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+    <a href="signoff.html" class="btn btn-outline">✍️ Go to Sign-off</a>
+  </div>
+</div>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+buildNavbar('dgtest');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+
+const STEPS = [
+  { pct:0,   label:'No Load (0%)' },
+  { pct:25,  label:'25% Load' },
+  { pct:50,  label:'50% Load' },
+  { pct:75,  label:'75% Load' },
+  { pct:100, label:'100% (Full Load)' },
+  { pct:110, label:'110% (Overload)' },
+];
+
+const PARALLEL = [
+  'Synchronising by synchroscope — voltage match',
+  'Synchronising — frequency match',
+  'Synchronising — phase match (check sync lamp / scope)',
+  'Breaker closed at correct synchronisation point',
+  'Load sharing between two generators (50/50 at equal load)',
+  'AVR cross-current compensation operative',
+  'Load transfer from one generator to another without trip',
+  'Blackout recovery — auto start and close of breaker',
+];
+const ADDL = [
+  'Governor speed control response test (load step 0→50%)',
+  'AVR automatic voltage regulation verified (±1% band)',
+  'Droop setting verified (4–5%)',
+  'Short circuit protection (overcurrent relay) tested',
+  'Reverse power protection relay tested',
+  'Earth fault relay tested',
+  'Emergency stop (local) function tested',
+  'Emergency stop (remote / bridge) function tested',
+  'Transfer to shore power / blackout board tested',
+  'Load shedding / preferential trip relay sequence verified',
+  'Space heater (anti-condensation) tested',
+  'Battery charger / starting system verified',
+];
+
+const saved = EP.load('dg-form', {});
+
+function renderChecklist(containerId, items, prefix) {
+  document.getElementById(containerId).innerHTML = items.map((item,i) => {
+    const v = saved[`${prefix}_${i}`]||'';
+    return `<div class="check-item">
+      <span class="check-label">${i+1}. ${item}</span>
+      <div class="check-result">
+        <label class="r-pass"><input type="radio" name="${prefix}_${i}" value="pass" ${v==='pass'?'checked':''}/> <span>✓ OK</span></label>
+        <label class="r-fail"><input type="radio" name="${prefix}_${i}" value="fail" ${v==='fail'?'checked':''}/> <span>✗ Fail</span></label>
+        <label class="r-na"><input type="radio" name="${prefix}_${i}" value="na"   ${v==='na'?'checked':''}/> <span>N/A</span></label>
+      </div>
+    </div>`;
+  }).join('');
+}
+renderChecklist('parallel-list', PARALLEL, 'par');
+renderChecklist('addl-list', ADDL, 'add');
+
+function renderLoadTable() {
+  document.getElementById('load-body').innerHTML = STEPS.map((s,i) => {
+    const p = k => saved[`ls_${i}_${k}`]||'';
+    return `<tr>
+      <td><strong>${i+1}</strong></td>
+      <td><strong style="color:var(--teal-br)">${s.pct}%</strong><br><span style="font-size:10px;color:var(--text-dim)">${s.label}</span></td>
+      <td><input type="number" name="ls_${i}_dur" value="${p('dur')}" placeholder="30" oninput="recalc()"/></td>
+      <td><input type="number" name="ls_${i}_kw"  value="${p('kw')}"  placeholder="" oninput="recalc()"/></td>
+      <td><input type="number" name="ls_${i}_kvar" value="${p('kvar')}" placeholder="" oninput="recalc()"/></td>
+      <td class="calc" id="kva_${i}">—</td>
+      <td class="calc" id="pfc_${i}">—</td>
+      <td><input type="number" name="ls_${i}_v"   value="${p('v')}"   placeholder="440" oninput="recalc()"/></td>
+      <td><input type="number" name="ls_${i}_hz"  value="${p('hz')}"  placeholder="50"  oninput="recalc()"/></td>
+      <td><input type="number" name="ls_${i}_rpm" value="${p('rpm')}" placeholder=""/></td>
+      <td><input type="number" name="ls_${i}_exh" value="${p('exh')}" placeholder=""/></td>
+      <td><input type="number" name="ls_${i}_lo"  value="${p('lo')}"  placeholder="" step="0.1"/></td>
+      <td><input type="number" name="ls_${i}_cool" value="${p('cool')}" placeholder=""/></td>
+      <td id="res_${i}"><span class="badge badge-pending">—</span></td>
+    </tr>`;
+  }).join('');
+  recalc();
+}
+renderLoadTable();
+
+let dgChart;
+function recalc() {
+  const kvas=[], kws=[], freqs=[], volts=[];
+  STEPS.forEach((s,i) => {
+    const kw  = parseFloat(document.querySelector(`[name="ls_${i}_kw"]`)?.value)||0;
+    const kvar = parseFloat(document.querySelector(`[name="ls_${i}_kvar"]`)?.value)||0;
+    const v   = parseFloat(document.querySelector(`[name="ls_${i}_v"]`)?.value)||0;
+    const hz  = parseFloat(document.querySelector(`[name="ls_${i}_hz"]`)?.value)||0;
+    const kva = kw||kvar ? Math.sqrt(kw**2+kvar**2) : 0;
+    const pf  = kva ? (kw/kva) : 0;
+    document.getElementById(`kva_${i}`).textContent = kva ? kva.toFixed(1) : '—';
+    document.getElementById(`pfc_${i}`).textContent = pf  ? pf.toFixed(3)  : '—';
+    // Pass/fail: overload step can run 1hr; others unlimited
+    const res = kva > 0
+      ? `<span class="badge badge-pass">OK</span>`
+      : `<span class="badge badge-pending">—</span>`;
+    document.getElementById(`res_${i}`).innerHTML = res;
+    kvas.push(kva.toFixed(1)); kws.push(kw); freqs.push(hz); volts.push(v);
+  });
+
+  // Regulation
+  const nlV  = parseFloat(document.querySelector('[name="ls_0_v"]')?.value)||0;
+  const flV  = parseFloat(document.querySelector('[name="ls_4_v"]')?.value)||0;
+  const nlHz = parseFloat(document.querySelector('[name="ls_0_hz"]')?.value)||0;
+  const flHz = parseFloat(document.querySelector('[name="ls_4_hz"]')?.value)||0;
+
+  const vReg = (nlV && flV) ? ((nlV-flV)/flV*100) : null;
+  const fReg = (nlHz && flHz) ? ((nlHz-flHz)/flHz*100) : null;
+
+  document.getElementById('vreg-val').textContent = vReg!==null ? vReg.toFixed(2)+'%' : '—';
+  document.getElementById('freg-val').textContent = fReg!==null ? fReg.toFixed(2)+'%' : '—';
+  document.getElementById('vreg-badge').innerHTML = vReg!==null ? passFailBadge(Math.abs(vReg)<=5) : '';
+  document.getElementById('freg-badge').innerHTML = fReg!==null ? passFailBadge(Math.abs(fReg)<=5) : '';
+
+  // KVA tiles
+  const nlKW = parseFloat(document.querySelector('[name="ls_0_kw"]')?.value)||0;
+  const nlKVAR = parseFloat(document.querySelector('[name="ls_0_kvar"]')?.value)||0;
+  const flKW = parseFloat(document.querySelector('[name="ls_4_kw"]')?.value)||0;
+  const flKVAR = parseFloat(document.querySelector('[name="ls_4_kvar"]')?.value)||0;
+  const olKW = parseFloat(document.querySelector('[name="ls_5_kw"]')?.value)||0;
+  const olKVAR = parseFloat(document.querySelector('[name="ls_5_kvar"]')?.value)||0;
+  const nlKVA = Math.sqrt(nlKW**2+nlKVAR**2);
+  const flKVA = Math.sqrt(flKW**2+flKVAR**2);
+  const olKVA = Math.sqrt(olKW**2+olKVAR**2);
+  document.getElementById('nl-kva').textContent = nlKVA ? nlKVA.toFixed(1) : '—';
+  document.getElementById('fl-kva').textContent = flKVA ? flKVA.toFixed(1) : '—';
+  document.getElementById('ol-kva').textContent = olKVA ? olKVA.toFixed(1) : '—';
+  const rKVA = parseFloat(document.getElementById('rated-kva')?.value)||0;
+  document.getElementById('ol-badge').innerHTML = (olKVA && rKVA) ? passFailBadge(olKVA >= rKVA*1.1*0.95, '110% OK') : '';
+
+  // Chart
+  const labels = STEPS.map(s=>s.pct+'%');
+  if (dgChart) dgChart.destroy();
+  const ctx = document.getElementById('dg-chart').getContext('2d');
+  dgChart = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        { type:'bar',  label:'kW',  data:kws,  backgroundColor:'rgba(13,200,200,0.3)', borderColor:'#0DC8C8', borderWidth:1, yAxisID:'y' },
+        { type:'line', label:'V',   data:volts, borderColor:'#f59e0b', tension:.3, yAxisID:'y2', fill:false },
+        { type:'line', label:'Hz',  data:freqs, borderColor:'#22c55e', tension:.3, yAxisID:'y2', fill:false },
+      ]
+    },
+    options: {
+      responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{labels:{color:'#7ACFCF',font:{family:'Roboto'}}} },
+      scales:{
+        y:  { grid:{color:'rgba(10,150,150,0.1)'}, ticks:{color:'#7ACFCF'}, title:{display:true,text:'kW',color:'#7ACFCF'} },
+        y2: { position:'right', grid:{drawOnChartArea:false}, ticks:{color:'#7ACFCF'}, title:{display:true,text:'V / Hz',color:'#7ACFCF'} },
+        x:  { grid:{color:'rgba(10,150,150,0.1)'}, ticks:{color:'#7ACFCF'} },
+      }
+    }
+  });
+}
+
+function updateRated() { recalc(); }
+
+function saveDG() {
+  const data = { ...saved };
+  document.querySelectorAll('#load-body input, #load-body select').forEach(el => { if(el.name) data[el.name]=el.value; });
+  document.querySelectorAll('input[type=radio]:checked').forEach(r => data[r.name]=r.value);
+  data['dg-set'] = document.getElementById('dg-set')?.value;
+  data['dg-date'] = document.getElementById('dg-date')?.value;
+  data['dg-location'] = document.getElementById('dg-location')?.value;
+  data['dg-remarks'] = document.getElementById('dg-remarks')?.value;
+  EP.save('dg-form', data);
+  toast('D.G. test data saved', 'pass');
+}
+
+function markDone() { saveDG(); setModuleStatus('dgtest','done'); toast('D.G. Test marked complete ✓','pass'); }
+
+function exportDGExcel() {
+  const rows = STEPS.map((s,i) => ({
+    'Step': s.label,
+    'kW': document.querySelector(`[name="ls_${i}_kw"]`)?.value||'',
+    'kVAR': document.querySelector(`[name="ls_${i}_kvar"]`)?.value||'',
+    'kVA': document.getElementById(`kva_${i}`)?.textContent||'',
+    'PF': document.getElementById(`pfc_${i}`)?.textContent||'',
+    'Voltage(V)': document.querySelector(`[name="ls_${i}_v"]`)?.value||'',
+    'Frequency(Hz)': document.querySelector(`[name="ls_${i}_hz"]`)?.value||'',
+    'RPM': document.querySelector(`[name="ls_${i}_rpm"]`)?.value||'',
+    'Exhaust(°C)': document.querySelector(`[name="ls_${i}_exh"]`)?.value||'',
+    'LO Press(bar)': document.querySelector(`[name="ls_${i}_lo"]`)?.value||'',
+    'Coolant(°C)': document.querySelector(`[name="ls_${i}_cool"]`)?.value||'',
+    'Duration(min)': document.querySelector(`[name="ls_${i}_dur"]`)?.value||'',
+  }));
+  exportExcel([{ name:'DG Load Test', data: rows }], `DGTest_${getProject().vesselName||'vessel'}.xlsx`);
+}
+</script>
+</body>
+</html>

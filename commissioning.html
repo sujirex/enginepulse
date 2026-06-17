@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — Commissioning</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="navbar"></div>
+<div class="page">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> › Commissioning Test</div>
+  <div class="page-header">
+    <div class="page-title">🔧 Commissioning Test</div>
+    <div class="page-sub">Pre-start checklist · Safety device trips · Alarm tests · First fire record</div>
+  </div>
+  <div id="vessel-strip"></div>
+
+  <form id="comm-form">
+
+  <!-- A. Pre-Start Checks -->
+  <div class="section">
+    <div class="section-title">A. Pre-Start Checks</div>
+    <div class="card">
+      <div class="checklist" id="prestart-list"></div>
+    </div>
+  </div>
+
+  <!-- B. Safety Device Trips -->
+  <div class="section">
+    <div class="section-title">B. Safety Device Trip Tests</div>
+    <div class="card">
+      <div class="table-wrap">
+        <table id="safety-table">
+          <thead>
+            <tr>
+              <th>Safety Device</th>
+              <th>Set Point</th>
+              <th>Trip Value Recorded</th>
+              <th>Unit</th>
+              <th>Result</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="safety-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. Alarm Tests -->
+  <div class="section">
+    <div class="section-title">C. Alarm & Shutdown Tests</div>
+    <div class="card">
+      <div class="checklist" id="alarm-list"></div>
+    </div>
+  </div>
+
+  <!-- D. Cold / Slow Turning -->
+  <div class="section">
+    <div class="section-title">D. Cold Turning / Slow Turning Record</div>
+    <div class="card">
+      <div class="form-row col-3">
+        <div class="form-group"><label>Date</label><input type="date" name="coldDate"/></div>
+        <div class="form-group"><label>Time</label><input type="time" name="coldTime"/></div>
+        <div class="form-group"><label>Duration (min)</label><input type="number" name="coldDuration" placeholder="15"/></div>
+      </div>
+      <div class="form-row col-3">
+        <div class="form-group"><label>Turning Gear Type</label><select name="turningGearType"><option>Air Motor</option><option>Electric Motor</option><option>Hydraulic</option><option>Manual</option></select></div>
+        <div class="form-group"><label>Indicator Cocks</label><select name="indicatorCocks"><option value="open">Open during turning</option><option value="closed">Closed</option></select></div>
+        <div class="form-group"><label>Turning Gear Disengaged After</label><select name="tgDisengaged"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      </div>
+      <div class="form-group"><label>Observations / Remarks</label><textarea name="coldRemarks" placeholder="Any findings, unusual sounds, water in cylinders, etc."></textarea></div>
+      <div class="form-row col-2" style="margin-top:8px">
+        <div><label style="margin-bottom:6px">Turning Result</label>
+          <label class="check-result" style="display:inline-flex;margin-right:8px"><input type="radio" name="coldResult" value="satisfactory"/> <span>✓ Satisfactory</span></label>
+          <label class="check-result" style="display:inline-flex"><input type="radio" name="coldResult" value="unsatisfactory"/> <span>✗ Unsatisfactory</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E. First Fire -->
+  <div class="section">
+    <div class="section-title">E. First Fire / Initial Start Record</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Date</label><input type="date" name="firstFireDate"/></div>
+        <div class="form-group"><label>Time</label><input type="time" name="firstFireTime"/></div>
+        <div class="form-group"><label>Start Method</label><select name="startMethod"><option>Air Start</option><option>Electric Start</option><option>Hydraulic Start</option></select></div>
+        <div class="form-group"><label>Air Start Pressure (bar)</label><input type="number" name="airPressure" placeholder="30"/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Initial LO Pressure (bar)</label><input type="number" name="initLoPres" step="0.1" placeholder="3.5"/></div>
+        <div class="form-group"><label>Initial RPM (no load)</label><input type="number" name="initRpm" placeholder="700"/></div>
+        <div class="form-group"><label>Idle Run Duration (min)</label><input type="number" name="idleDuration" placeholder="30"/></div>
+        <div class="form-group"><label>Exhaust Colour at Start</label><select name="exhaustColour"><option>Clear</option><option>White Smoke</option><option>Black Smoke</option><option>Blue Smoke</option></select></div>
+      </div>
+      <div class="form-row col-3">
+        <div class="form-group"><label>LO Temp at Idle (°C)</label><input type="number" name="idleLoTemp" placeholder="60"/></div>
+        <div class="form-group"><label>Coolant Temp at Idle (°C)</label><input type="number" name="idleCoolant" placeholder="70"/></div>
+        <div class="form-group"><label>No-Load Voltage (V)</label><input type="number" name="noLoadVoltage" placeholder="440"/></div>
+      </div>
+      <div class="form-group"><label>First Fire Remarks</label><textarea name="firstFireRemarks" placeholder="Observations during initial start and idle run..."></textarea></div>
+      <div style="margin-top:8px">
+        <label style="margin-bottom:6px">First Fire Result</label><br>
+        <label class="check-result" style="display:inline-flex;margin-right:8px"><input type="radio" name="firstFireResult" value="pass"/> <span>✓ Pass</span></label>
+        <label class="check-result" style="display:inline-flex"><input type="radio" name="firstFireResult" value="fail"/> <span>✗ Fail</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- F. No-Load Parameters -->
+  <div class="section">
+    <div class="section-title">F. No-Load Running Parameters</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>RPM</label><input type="number" name="nlRpm" placeholder=""/></div>
+        <div class="form-group"><label>LO Pressure (bar)</label><input type="number" name="nlLoPres" step="0.1" placeholder=""/></div>
+        <div class="form-group"><label>LO Temperature (°C)</label><input type="number" name="nlLoTemp" placeholder=""/></div>
+        <div class="form-group"><label>Coolant Temp (°C)</label><input type="number" name="nlCoolant" placeholder=""/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Fuel Pressure (bar)</label><input type="number" name="nlFuelPres" step="0.1" placeholder=""/></div>
+        <div class="form-group"><label>Charge Air Pressure (bar)</label><input type="number" name="nlChargeAir" step="0.01" placeholder=""/></div>
+        <div class="form-group"><label>Exhaust Temp Avg (°C)</label><input type="number" name="nlExhTemp" placeholder=""/></div>
+        <div class="form-group"><label>Vibration (mm/s)</label><input type="number" name="nlVibration" step="0.1" placeholder=""/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- G. Overall Result -->
+  <div class="section">
+    <div class="section-title">G. Overall Commissioning Result</div>
+    <div class="card">
+      <div class="form-row col-2">
+        <div class="form-group"><label>Overall Result</label>
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <label class="check-result" style="display:inline-flex"><input type="radio" name="overallResult" value="pass"/> <span>✓ Satisfactory</span></label>
+            <label class="check-result" style="display:inline-flex"><input type="radio" name="overallResult" value="fail"/> <span>✗ Unsatisfactory</span></label>
+          </div>
+        </div>
+        <div class="form-group"><label>Completion Date & Time</label><input type="datetime-local" name="completionDt"/></div>
+      </div>
+      <div class="form-group"><label>Final Remarks / Outstanding Items</label><textarea name="finalRemarks" placeholder="Any punch list items, deficiencies noted, recommendations..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button type="button" class="btn btn-primary" onclick="saveComm()">💾 Save</button>
+    <button type="button" class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
+    <button type="button" class="btn btn-outline" onclick="printSection('print-area')">🖨️ Print</button>
+    <button type="button" class="btn btn-outline" onclick="exportCommExcel()">📊 Export Excel</button>
+    <a href="signoff.html" class="btn btn-outline">✍️ Go to Sign-off</a>
+  </div>
+
+  </form>
+</div>
+<div id="print-area" style="display:none"></div>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+buildNavbar('commissioning');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+
+// ── Checklist data ──
+const PRE_START = [
+  'Lube oil level checked and topped up to operating mark',
+  'Lube oil sample taken and inspected (colour, viscosity, no water)',
+  'Jacket cooling water level checked, inhibitor concentration verified',
+  'Fuel system primed and vented, filters checked',
+  'Air start system pressure adequate (≥25 bar)',
+  'Starting air bottles fully charged',
+  'All indicator / test cocks closed',
+  'All drain cocks on manifolds and jackets closed',
+  'Turbocharger lube oil level checked',
+  'Fuel injection pumps and injectors inspected and fitted',
+  'Fuel supply and return valves open',
+  'Cooling water inlet and outlet valves open',
+  'Exhaust system clear and unobstructed',
+  'All guards, covers and couplings properly secured',
+  'Turning gear disengaged and secured',
+  'Engine room bilges dry and pumps operational',
+  'All instruments, gauges and sensors connected and calibrated',
+  'Fire detection and suppression system operational',
+  'Engine room ventilation operational',
+  'Emergency stop device tested and reset',
+  'Governor oil level checked',
+  'Intercooler water flow verified',
+  'All clamps and fasteners torqued to specification',
+  'Alignment of shaft / coupling verified',
+];
+
+const ALARM_ITEMS = [
+  'Low lube oil pressure alarm (engine stops below set point)',
+  'High jacket water temperature alarm',
+  'High exhaust temperature alarm (common)',
+  'Low cooling water flow alarm',
+  'High crankcase pressure alarm / mist detector',
+  'Low fuel pressure alarm',
+  'Overspeed trip (mechanical and electronic)',
+  'Bearing temperature high alarm (main / thrust)',
+  'Charge air high temperature alarm',
+  'Turbocharger surge alarm',
+  'Emergency stop from engine room station',
+  'Emergency stop from bridge',
+  'Remote stop from control room',
+  'Auto start on blackout (for generators)',
+  'Preferential trip / load shedding (for generators)',
+];
+
+const SAFETY_DEVICES = [
+  { name:'Overspeed Trip (Mechanical)', unit:'RPM', setPoint:'≥115% rated' },
+  { name:'Overspeed Trip (Electronic)', unit:'RPM', setPoint:'≥115% rated' },
+  { name:'Low Lube Oil Pressure Shutdown', unit:'bar', setPoint:'< 1.5' },
+  { name:'High Jacket Water Temp Shutdown', unit:'°C', setPoint:'> 95' },
+  { name:'High Exhaust Temp Shutdown', unit:'°C', setPoint:'> 450' },
+  { name:'High Crankcase Pressure Trip', unit:'mmH₂O', setPoint:'> 20' },
+  { name:'Low Lube Oil Pressure Alarm', unit:'bar', setPoint:'< 2.0' },
+  { name:'High LO Temperature Alarm', unit:'°C', setPoint:'> 75' },
+  { name:'Emergency Stop (Local)', unit:'—', setPoint:'Manual' },
+  { name:'Emergency Stop (Remote)', unit:'—', setPoint:'Manual' },
+];
+
+function renderChecklist(containerId, items, prefix) {
+  const el = document.getElementById(containerId);
+  const saved = EP.load('comm-form', {});
+  el.innerHTML = items.map((item, i) => {
+    const key = `${prefix}_${i}`;
+    const val = saved[key] || '';
+    return `<div class="check-item">
+      <span class="check-label">${i+1}. ${item}</span>
+      <div class="check-result">
+        <label class="r-pass"><input type="radio" name="${key}" value="pass" ${val==='pass'?'checked':''}/> <span>✓ OK</span></label>
+        <label class="r-fail"><input type="radio" name="${key}" value="fail" ${val==='fail'?'checked':''}/> <span>✗ Fail</span></label>
+        <label class="r-na"><input type="radio" name="${key}" value="na"   ${val==='na'?'checked':''}/> <span>N/A</span></label>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSafetyTable() {
+  const saved = EP.load('comm-form', {});
+  document.getElementById('safety-body').innerHTML = SAFETY_DEVICES.map((d,i) => {
+    return `<tr>
+      <td>${d.name}</td>
+      <td><span style="color:var(--teal-br);font-family:'Roboto Mono',monospace">${d.setPoint}</span></td>
+      <td><input type="number" name="st_val_${i}" value="${saved['st_val_'+i]||''}" step="0.1" placeholder="Recorded"/></td>
+      <td>${d.unit}</td>
+      <td>
+        <label style="margin:0"><input type="radio" name="st_res_${i}" value="pass" ${saved['st_res_'+i]==='pass'?'checked':''}/> <span class="badge badge-pass">Pass</span></label>&nbsp;
+        <label style="margin:0"><input type="radio" name="st_res_${i}" value="fail" ${saved['st_res_'+i]==='fail'?'checked':''}/> <span class="badge badge-fail">Fail</span></label>
+      </td>
+      <td><input type="text" name="st_rem_${i}" value="${saved['st_rem_'+i]||''}" placeholder="Remark"/></td>
+    </tr>`;
+  }).join('');
+}
+
+renderChecklist('prestart-list', PRE_START, 'ps');
+renderChecklist('alarm-list', ALARM_ITEMS, 'al');
+renderSafetyTable();
+autoSaveForm('comm-form', 'comm-form');
+
+function saveComm() {
+  const form = document.getElementById('comm-form');
+  const data = {};
+  new FormData(form).forEach((v,k) => data[k]=v);
+  form.querySelectorAll('input[type=radio]:checked').forEach(r => data[r.name]=r.value);
+  EP.save('comm-form', data);
+  toast('Commissioning data saved', 'pass');
+}
+
+function markDone() {
+  saveComm();
+  setModuleStatus('commissioning', 'done');
+  toast('Commissioning marked complete ✓', 'pass');
+}
+
+function exportCommExcel() {
+  const saved = EP.load('comm-form', {});
+  const preRows = PRE_START.map((item,i) => ({ 'Item': item, 'Result': saved[`ps_${i}`]||'—' }));
+  const safeRows = SAFETY_DEVICES.map((d,i) => ({
+    'Safety Device': d.name, 'Set Point': d.setPoint, 'Recorded': saved[`st_val_${i}`]||'',
+    'Unit': d.unit, 'Result': saved[`st_res_${i}`]||'—', 'Remark': saved[`st_rem_${i}`]||''
+  }));
+  const alarmRows = ALARM_ITEMS.map((item,i) => ({ 'Alarm/Shutdown': item, 'Result': saved[`al_${i}`]||'—' }));
+  exportExcel([
+    { name:'Pre-Start Checks', data: preRows },
+    { name:'Safety Device Trips', data: safeRows },
+    { name:'Alarm Tests', data: alarmRows },
+  ], `Commissioning_${getProject().vesselName||'vessel'}.xlsx`);
+}
+</script>
+</body>
+</html>

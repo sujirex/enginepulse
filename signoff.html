@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — Surveyor Sign-off</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    #sig-canvas { border:1px solid var(--border); border-radius:8px; background:#fff; cursor:crosshair; touch-action:none; display:block; }
+    .sig-wrap { position:relative; }
+    .sig-hint { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; color:#ccc; font-size:13px; text-align:center; }
+    .module-check { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); }
+    .module-check label { display:flex; align-items:center; gap:8px; cursor:pointer; flex:1; }
+    .module-check input[type=checkbox] { width:16px; height:16px; accent-color:var(--teal); }
+    .signed-stamp { padding:16px; border:2px solid var(--teal); border-radius:10px; text-align:center; position:relative; }
+    .stamp-text { font-size:11px; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:.1em; }
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+<div class="page-sm">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> › Surveyor Sign-off</div>
+  <div class="page-header">
+    <div class="page-title">✍️ Surveyor Sign-off</div>
+    <div class="page-sub">Select tests · Enter surveyor details · Draw signature · Generate signed PDF</div>
+  </div>
+  <div id="vessel-strip"></div>
+
+  <!-- Module Selection -->
+  <div class="section">
+    <div class="section-title">A. Tests Being Signed Off</div>
+    <div style="display:flex;flex-direction:column;gap:6px" id="module-checks"></div>
+  </div>
+
+  <!-- Surveyor Details -->
+  <div class="section">
+    <div class="section-title">B. Surveyor Details</div>
+    <div class="card">
+      <div class="form-row col-2">
+        <div class="form-group"><label>Surveyor Name</label><input type="text" id="so-name" placeholder="Full Name"/></div>
+        <div class="form-group"><label>Class Society</label><input type="text" id="so-class" placeholder="IRS / LR / DNV / BV / ABS"/></div>
+      </div>
+      <div class="form-row col-3">
+        <div class="form-group"><label>Certificate / Badge No.</label><input type="text" id="so-cert" placeholder="Cert Number"/></div>
+        <div class="form-group"><label>Survey Date</label><input type="date" id="so-date"/></div>
+        <div class="form-group"><label>Survey Location</label><input type="text" id="so-location" placeholder="Port / Yard"/></div>
+      </div>
+      <div class="form-group"><label>Remarks / Overall Observations</label><textarea id="so-remarks" placeholder="Overall findings, any outstanding items, recommendations to owner/builder..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Witness -->
+  <div class="section">
+    <div class="section-title">C. Witness / Owner's Representative</div>
+    <div class="card">
+      <div class="form-row col-3">
+        <div class="form-group"><label>Witness Name</label><input type="text" id="w-name" placeholder="Full Name"/></div>
+        <div class="form-group"><label>Designation</label><input type="text" id="w-designation" placeholder="Chief Engineer / Owner's Rep"/></div>
+        <div class="form-group"><label>Company</label><input type="text" id="w-company" placeholder="Company Name"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signature Pad -->
+  <div class="section">
+    <div class="section-title">D. Surveyor's Digital Signature</div>
+    <div class="card">
+      <div class="callout">Draw your signature in the box below using mouse or stylus.</div>
+      <div class="sig-wrap">
+        <canvas id="sig-canvas" width="700" height="160"></canvas>
+        <div class="sig-hint" id="sig-hint">Sign here</div>
+      </div>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn btn-outline" onclick="clearSig()">Clear Signature</button>
+        <button class="btn btn-outline" onclick="saveSig()">💾 Save Signature</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Witness Signature -->
+  <div class="section">
+    <div class="section-title">E. Witness Signature</div>
+    <div class="card">
+      <div class="sig-wrap">
+        <canvas id="wit-canvas" width="700" height="120"></canvas>
+        <div class="sig-hint" id="wit-hint">Witness signs here</div>
+      </div>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn btn-outline" onclick="clearWit()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview & Sign -->
+  <div class="section">
+    <div class="section-title">F. Sign-off Summary Preview</div>
+    <div class="card" id="signoff-preview"></div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="generatePDF()">📄 Generate Signed PDF</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-outline" onclick="finalise()">✓ Finalise & Lock</button>
+    <button class="btn btn-outline" onclick="saveSignoff()">💾 Save Draft</button>
+  </div>
+
+  <!-- Locked view -->
+  <div id="locked-banner" style="display:none" class="callout" style="border-color:var(--pass)">
+    🔒 <strong>This sign-off has been finalised.</strong> To edit, clear the lock below.
+    <button class="btn btn-outline" style="margin-left:10px" onclick="unlockSignoff()">Unlock</button>
+  </div>
+
+</div>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+buildNavbar('signoff');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+
+const MODULES = [
+  { key:'commissioning', title:'Commissioning Test',     href:'commissioning.html' },
+  { key:'dgtest',        title:'D.G. Load Test',         href:'dgtest.html' },
+  { key:'seatrial',      title:'Sea Trial',              href:'seatrial.html' },
+  { key:'longtrial',     title:'Long Trial / Endurance', href:'longtrial.html' },
+  { key:'predictive',    title:'Predictive Analysis',    href:'predictive.html' },
+];
+
+// Render module checkboxes
+const saved = EP.load('signoff', {});
+document.getElementById('module-checks').innerHTML = MODULES.map(m=>{
+  const status = getModuleStatus(m.key);
+  const checked = saved[`check_${m.key}`] ? 'checked' : '';
+  return `<div class="module-check">
+    <label>
+      <input type="checkbox" name="check_${m.key}" ${checked} onchange="updatePreview()"/>
+      <span style="flex:1"><strong>${m.title}</strong></span>
+    </label>
+    ${statusDot(status)}
+    <a href="${m.href}" style="font-size:11px;color:var(--teal);text-decoration:none">View →</a>
+  </div>`;
+}).join('');
+
+// Restore fields
+['so-name','so-class','so-cert','so-date','so-location','so-remarks',
+ 'w-name','w-designation','w-company'].forEach(id=>{
+  const el = document.getElementById(id);
+  if (el && saved[id]) el.value = saved[id];
+});
+['so-name','so-class','so-cert','so-date','so-location','so-remarks',
+ 'w-name','w-designation','w-company'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input', updatePreview);
+});
+
+// ── Signature pad ──
+function makePad(canvasId, hintId) {
+  const canvas = document.getElementById(canvasId);
+  const hint   = document.getElementById(hintId);
+  const ctx    = canvas.getContext('2d');
+  let drawing  = false;
+  let hasSig   = false;
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  }
+  canvas.addEventListener('mousedown', e => { drawing=true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); hint.style.display='none'; hasSig=true; });
+  canvas.addEventListener('mousemove', e => { if(!drawing) return; const p=getPos(e); ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#0A3636'; ctx.lineTo(p.x,p.y); ctx.stroke(); });
+  canvas.addEventListener('mouseup',   () => { drawing=false; });
+  canvas.addEventListener('mouseleave',() => { drawing=false; });
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); hint.style.display='none'; hasSig=true; });
+  canvas.addEventListener('touchmove',  e => { e.preventDefault(); if(!drawing) return; const p=getPos(e); ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#0A3636'; ctx.lineTo(p.x,p.y); ctx.stroke(); });
+  canvas.addEventListener('touchend',   () => { drawing=false; });
+  return { clear: () => { ctx.clearRect(0,0,canvas.width,canvas.height); hint.style.display='block'; hasSig=false; }, hasData: () => hasSig, toDataURL: () => canvas.toDataURL() };
+}
+
+const sigPad = makePad('sig-canvas','sig-hint');
+const witPad = makePad('wit-canvas','wit-hint');
+
+function clearSig() { sigPad.clear(); }
+function clearWit() { witPad.clear(); }
+function saveSig()  { toast('Signature saved','pass'); updatePreview(); }
+
+// Restore saved signature
+if (saved.sigData) {
+  const img = new Image();
+  img.onload = () => { document.getElementById('sig-canvas').getContext('2d').drawImage(img,0,0); };
+  img.src = saved.sigData;
+  document.getElementById('sig-hint').style.display='none';
+}
+
+function getCheckedModules() {
+  return MODULES.filter(m => document.querySelector(`[name="check_${m.key}"]`)?.checked);
+}
+
+function updatePreview() {
+  const checked  = getCheckedModules();
+  const proj     = getProject();
+  const name     = document.getElementById('so-name')?.value||'—';
+  const cls      = document.getElementById('so-class')?.value||'—';
+  const cert     = document.getElementById('so-cert')?.value||'—';
+  const date     = document.getElementById('so-date')?.value||'—';
+  const location = document.getElementById('so-location')?.value||'—';
+  const remarks  = document.getElementById('so-remarks')?.value||'';
+  const wName    = document.getElementById('w-name')?.value||'';
+  const wDesig   = document.getElementById('w-designation')?.value||'';
+
+  document.getElementById('signoff-preview').innerHTML = `
+    <div style="border:2px solid var(--teal);border-radius:10px;padding:20px;font-size:12px">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:18px;font-weight:700;color:var(--teal-br)">ENGINE TEST CERTIFICATE</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">EnginePulse · ${new Date().toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'})}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;margin-bottom:14px">
+        <div><span style="color:var(--text-dim)">Vessel:</span> <strong>${proj.vesselName||'—'}</strong></div>
+        <div><span style="color:var(--text-dim)">IMO:</span> <strong>${proj.imo||'—'}</strong></div>
+        <div><span style="color:var(--text-dim)">Flag:</span> <strong>${proj.flag||'—'}</strong></div>
+        <div><span style="color:var(--text-dim)">Class:</span> <strong>${proj.classSociety||'—'}</strong></div>
+        <div><span style="color:var(--text-dim)">Engine:</span> <strong>${proj.engineMaker||'—'} ${proj.engineModel||''}</strong></div>
+        <div><span style="color:var(--text-dim)">MCR:</span> <strong>${proj.mcr||'—'} kW @ ${proj.ratedRpm||'—'} RPM</strong></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);margin-bottom:6px">Tests Certified</div>
+        ${checked.map(m=>`<div style="padding:4px 8px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:5px;margin-bottom:4px;font-weight:500">✓ ${m.title}</div>`).join('')}
+        ${!checked.length?'<div style="color:var(--text-dim)">No tests selected</div>':''}
+      </div>
+      ${remarks?`<div style="margin-bottom:12px;padding:8px;background:var(--bg-raised);border-radius:6px"><strong>Remarks:</strong> ${remarks}</div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px">
+        <div>
+          <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Surveyor</div>
+          <div style="height:60px;border-bottom:1px solid var(--border);margin-bottom:6px;background:rgba(255,255,255,0.02);border-radius:4px 4px 0 0"></div>
+          <div style="font-size:11px"><strong>${name}</strong><br/>${cls} · ${cert}<br/>${date} · ${location}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Witness</div>
+          <div style="height:60px;border-bottom:1px solid var(--border);margin-bottom:6px;background:rgba(255,255,255,0.02);border-radius:4px 4px 0 0"></div>
+          <div style="font-size:11px"><strong>${wName}</strong><br/>${wDesig}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function saveSignoff() {
+  const data = {};
+  ['so-name','so-class','so-cert','so-date','so-location','so-remarks',
+   'w-name','w-designation','w-company'].forEach(id=>{ data[id]=document.getElementById(id)?.value||''; });
+  MODULES.forEach(m=>{ data[`check_${m.key}`]=document.querySelector(`[name="check_${m.key}"]`)?.checked||false; });
+  if (sigPad.hasData()) data.sigData = sigPad.toDataURL();
+  EP.save('signoff', data);
+  toast('Sign-off saved','pass');
+}
+
+function finalise() {
+  saveSignoff();
+  getCheckedModules().forEach(m=>setModuleStatus(m.key,'signed'));
+  EP.save('signoff-locked', true);
+  document.getElementById('locked-banner').style.display='block';
+  toast('Sign-off finalised and locked ✓','pass');
+}
+function unlockSignoff() { EP.remove('signoff-locked'); document.getElementById('locked-banner').style.display='none'; }
+
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p','mm','a4');
+  const proj     = getProject();
+  const name     = document.getElementById('so-name')?.value||'';
+  const cls      = document.getElementById('so-class')?.value||'';
+  const cert     = document.getElementById('so-cert')?.value||'';
+  const date     = document.getElementById('so-date')?.value||'';
+  const location = document.getElementById('so-location')?.value||'';
+  const remarks  = document.getElementById('so-remarks')?.value||'';
+  const checked  = getCheckedModules();
+  const saved2   = EP.load('signoff',{});
+
+  doc.setFont('helvetica');
+  // Header
+  doc.setFontSize(18); doc.setTextColor(10,150,150);
+  doc.text('ENGINE TEST CERTIFICATE', 105, 20, {align:'center'});
+  doc.setFontSize(10); doc.setTextColor(100);
+  doc.text('Generated by EnginePulse · '+new Date().toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'}), 105, 27, {align:'center'});
+
+  // Vessel info box
+  doc.setDrawColor(10,150,150); doc.setLineWidth(0.5);
+  doc.rect(14, 32, 182, 38);
+  doc.setFontSize(9); doc.setTextColor(60);
+  const vInfo = [
+    ['Vessel:', proj.vesselName||'—', 'IMO:', proj.imo||'—'],
+    ['Flag:', proj.flag||'—', 'Class Society:', proj.classSociety||'—'],
+    ['Engine Maker:', proj.engineMaker||'—', 'Engine Model:', proj.engineModel||'—'],
+    ['MCR:', (proj.mcr||'—')+' kW', 'Rated RPM:', proj.ratedRpm||'—'],
+  ];
+  vInfo.forEach((row,i)=>{
+    doc.setFont('helvetica','bold'); doc.text(row[0], 18, 40+i*8);
+    doc.setFont('helvetica','normal'); doc.text(row[1], 45, 40+i*8);
+    doc.setFont('helvetica','bold'); doc.text(row[2], 110, 40+i*8);
+    doc.setFont('helvetica','normal'); doc.text(row[3], 145, 40+i*8);
+  });
+
+  // Tests table
+  doc.setFontSize(10); doc.setTextColor(10,150,150); doc.setFont('helvetica','bold');
+  doc.text('TESTS CERTIFIED', 14, 80);
+  doc.setDrawColor(200);
+  let y = 85;
+  checked.forEach(m=>{
+    doc.setFillColor(240,255,250); doc.rect(14, y, 182, 8, 'FD');
+    doc.setFontSize(9); doc.setTextColor(40); doc.setFont('helvetica','normal');
+    doc.text('✓  '+m.title, 18, y+5.5);
+    y += 10;
+  });
+
+  // Remarks
+  if (remarks) {
+    y += 4;
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(10,150,150);
+    doc.text('REMARKS', 14, y);
+    y += 5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(60);
+    const lines = doc.splitTextToSize(remarks, 180);
+    doc.text(lines, 14, y);
+    y += lines.length*5 + 4;
+  }
+
+  // Signatures
+  y = Math.max(y+10, 200);
+  doc.setLineWidth(0.3); doc.setDrawColor(150);
+  // Surveyor signature
+  doc.line(14, y+30, 95, y+30);
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(10,150,150);
+  doc.text('SURVEYOR', 14, y+35);
+  doc.setFont('helvetica','normal'); doc.setTextColor(60);
+  doc.text(name, 14, y+40);
+  doc.text(cls + (cert?' · Cert: '+cert:''), 14, y+45);
+  doc.text('Date: '+date+'  Location: '+location, 14, y+50);
+  // Surveyor sig image
+  if (saved2.sigData) { try { doc.addImage(saved2.sigData,'PNG',14,y+2,80,25); } catch(e){} }
+
+  // Witness signature
+  doc.line(110, y+30, 196, y+30);
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(10,150,150);
+  doc.text('WITNESS', 110, y+35);
+  doc.setFont('helvetica','normal'); doc.setTextColor(60);
+  doc.text(document.getElementById('w-name')?.value||'', 110, y+40);
+  doc.text(document.getElementById('w-designation')?.value||'', 110, y+45);
+
+  doc.save(`SignedCertificate_${proj.vesselName||'vessel'}_${date||'date'}.pdf`);
+  toast('PDF generated','pass');
+}
+
+// Init
+updatePreview();
+if (EP.load('signoff-locked')) { document.getElementById('locked-banner').style.display='block'; }
+</script>
+</body>
+</html>
