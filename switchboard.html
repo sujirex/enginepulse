@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — Main Switchboard Test</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="navbar"></div>
+<div class="page-sm">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> › Main Switchboard Test</div>
+  <div class="page-header">
+    <div class="page-title">⚡ Main Switchboard Test</div>
+    <div class="page-sub">Bus-tie · Preferential trip · Load shedding · Shore connection · Power changeover · Dead bus</div>
+  </div>
+  <div id="vessel-strip"></div>
+
+  <!-- A. Switchboard Details -->
+  <div class="section">
+    <div class="section-title">A. Switchboard Particulars</div>
+    <div class="card">
+      <form id="sb-details">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Switchboard Maker</label><input type="text" name="sbMaker" placeholder="ABB / Schneider / Siemens"/></div>
+          <div class="form-group"><label>Model / Type</label><input type="text" name="sbModel" placeholder="Model"/></div>
+          <div class="form-group"><label>Rated Voltage (V)</label><input type="number" name="sbVoltage" placeholder="440"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Rated Current (A)</label><input type="number" name="sbCurrent" placeholder="A"/></div>
+          <div class="form-group"><label>Short Circuit Rating (kA)</label><input type="number" name="sbScc" placeholder="kA" step="0.1"/></div>
+          <div class="form-group"><label>No. of Generator Panels</label><input type="number" name="sbGenPanels" placeholder="2 / 3"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Bus-Tie Breaker Type</label><input type="text" name="sbBusTieType" placeholder="Manual / Auto"/></div>
+          <div class="form-group"><label>Shore Connection Panel</label>
+            <select name="sbShore"><option value="yes">Yes</option><option value="no">No</option></select>
+          </div>
+          <div class="form-group"><label>Shore Voltage (V)</label><input type="number" name="sbShoreV" placeholder="440 / 6600"/></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- B. Bus-Tie Test -->
+  <div class="section">
+    <div class="section-title">B. Bus-Tie / Sectionalising Test</div>
+    <div class="card">
+      <form id="sb-bustie">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Bus-Tie Close Test Date</label><input type="datetime-local" name="btDate"/></div>
+          <div class="form-group"><label>DG1 Voltage before close (V)</label><input type="number" name="btDg1V" placeholder="V"/></div>
+          <div class="form-group"><label>DG2 Voltage before close (V)</label><input type="number" name="btDg2V" placeholder="V"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Phase sequence check (DG1)</label>
+            <select name="btPhSeq"><option value="">—</option><option value="ok">R-Y-B (Correct)</option><option value="wrong">Incorrect</option></select>
+          </div>
+          <div class="form-group"><label>Phase angle difference (°)</label><input type="number" name="btPhAngle" placeholder="≤ 10°" step="0.1"/></div>
+          <div class="form-group"><label>Bus-Tie Close — Result</label>
+            <select name="btResult"><option value="">—</option><option value="pass">PASS — Closed satisfactorily</option><option value="fail">FAIL</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Bus-Tie Test Remarks</label><textarea name="btRemarks" placeholder="Any trips, hunting, or abnormalities on bus-tie close..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- C. Dead Bus Energisation -->
+  <div class="section">
+    <div class="section-title">C. Dead Bus Energisation Test</div>
+    <div class="card">
+      <form id="sb-deadbus">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Test Date &amp; Time</label><input type="datetime-local" name="dbDate"/></div>
+          <div class="form-group"><label>Energising Generator</label><input type="text" name="dbGen" placeholder="DG1 / DG2"/></div>
+          <div class="form-group"><label>Time to Energise Bus (sec)</label><input type="number" name="dbTime" placeholder="sec" step="0.1"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Voltage after Energisation (V)</label><input type="number" name="dbVolt" placeholder="V"/></div>
+          <div class="form-group"><label>Hz after Energisation</label><input type="number" name="dbHz" placeholder="Hz" step="0.1"/></div>
+          <div class="form-group"><label>Result</label>
+            <select name="dbResult"><option value="">—</option><option value="pass">PASS</option><option value="fail">FAIL</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Remarks</label><textarea name="dbRemarks" placeholder="Dead bus energisation observations..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- D. Preferential Trip Test -->
+  <div class="section">
+    <div class="section-title">D. Preferential Trip / Load Shedding Test</div>
+    <div class="callout">Verifies automatic non-essential load shedding on generator overload to prevent total blackout.</div>
+    <div class="card">
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Load / Circuit</th><th>Priority</th><th>Set Point (% Load)</th><th>Trip Recorded</th><th>Time Delay (sec)</th><th>Pass</th><th>Fail</th><th>N/A</th></tr></thead>
+        <tbody id="pref-trip-body"></tbody>
+      </table>
+      <div class="form-row col-2" style="margin-top:12px">
+        <div class="form-group"><label>Load at Test (kW)</label><input type="number" id="pt-load" placeholder="kW on bus"/></div>
+        <div class="form-group"><label>Overall Preferential Trip Result</label>
+          <select id="pt-result"><option value="">—</option><option value="pass">PASS</option><option value="fail">FAIL</option></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E. Shore Connection Test -->
+  <div class="section">
+    <div class="section-title">E. Shore Connection / Power Changeover Test</div>
+    <div class="card">
+      <form id="sb-shore">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Shore Supply Voltage (V)</label><input type="number" name="shoreV" placeholder="V"/></div>
+          <div class="form-group"><label>Shore Supply Hz</label><input type="number" name="shoreHz" placeholder="Hz" step="0.1"/></div>
+          <div class="form-group"><label>Shore Cable Rating (A)</label><input type="number" name="shoreA" placeholder="A"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Shore-to-Ship Changeover — Time (sec)</label><input type="number" name="shoreTime" placeholder="sec"/></div>
+          <div class="form-group"><label>Ship-to-Shore Changeover — Time (sec)</label><input type="number" name="shoreBackTime" placeholder="sec"/></div>
+          <div class="form-group"><label>Interlock (prevents parallel)</label>
+            <select name="shoreInterlock"><option value="">—</option><option value="verified">Verified OK</option><option value="fail">Failed</option><option value="na">N/A</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Shore Connection Test Remarks</label><textarea name="shoreRemarks" placeholder="Any abnormalities during changeover..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- F. Protection Relay Tests -->
+  <div class="section">
+    <div class="section-title">F. Protection Relay & MCCB Tests</div>
+    <div class="card">
+      <form id="sb-protection">
+        <table class="data-table">
+          <thead><tr><th>Protection Device</th><th>Set Point</th><th>Recorded Trip Value</th><th>Pass</th><th>Fail</th><th>N/A</th><th>Remarks</th></tr></thead>
+          <tbody id="prot-body"></tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+
+  <!-- G. General Switchboard Checklist -->
+  <div class="section">
+    <div class="section-title">G. General Switchboard Checklist</div>
+    <div class="card">
+      <form id="sb-general">
+        <table class="data-table">
+          <thead><tr><th>Item</th><th>Pass</th><th>Fail</th><th>N/A</th><th>Remarks</th></tr></thead>
+          <tbody id="sb-gen-body"></tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+
+  <!-- H. Overall Result -->
+  <div class="section">
+    <div class="section-title">H. Overall Result</div>
+    <div class="card">
+      <form id="sb-result">
+        <div class="form-row col-2">
+          <div class="form-group"><label>Test Completion Date &amp; Time</label><input type="datetime-local" name="sbCompleted"/></div>
+          <div class="form-group"><label>Overall Result</label>
+            <select name="sbOverall">
+              <option value="">— Select —</option>
+              <option value="pass">PASS — Satisfactory</option>
+              <option value="conditional">CONDITIONAL PASS — Minor items pending</option>
+              <option value="fail">FAIL — Retrial required</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Outstanding Items / Conditions</label><textarea name="sbOutstanding" placeholder="Any items deferred..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="exportSbExcel()">📊 Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-outline" onclick="setModuleStatus('switchboard','done');toast('Marked complete','pass')">✓ Mark Complete</button>
+  </div>
+</div>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+buildNavbar('switchboard');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+
+// ── Preferential trip table ──
+const PT_LOADS = [
+  ['Non-essential AC loads (Group 1)','1','110%'],
+  ['Non-essential AC loads (Group 2)','2','115%'],
+  ['HVAC / Air Conditioning','3','115%'],
+  ['Galley / Electric Cooking','4','120%'],
+  ['Cargo equipment (non-essential)','5','120%'],
+  ['Workshop machinery','6','120%'],
+];
+const ptb = document.getElementById('pref-trip-body');
+PT_LOADS.forEach(([load, pri, sp], i) => {
+  ptb.innerHTML += `<tr>
+    <td>${i+1}</td><td>${load}</td><td>${pri}</td><td style="color:var(--teal-br)">${sp}</td>
+    <td><input type="text" placeholder="% load at trip"/></td>
+    <td><input type="number" placeholder="sec" step="0.1"/></td>
+    <td><input type="radio" name="pt${i}" value="pass"/></td>
+    <td><input type="radio" name="pt${i}" value="fail"/></td>
+    <td><input type="radio" name="pt${i}" value="na"/></td>
+  </tr>`;
+});
+
+// ── Protection relays ──
+const PROT = [
+  ['Generator Overcurrent (IDMT)','125% In (time-delayed)'],
+  ['Generator Earth Fault Relay','5–10% rated'],
+  ['Reverse Power Relay','5% rated kW'],
+  ['Under Voltage Relay (UV)','≤ 85% rated V'],
+  ['Over Voltage Relay (OV)','≥ 110% rated V'],
+  ['Under Frequency Relay','≤ 95% rated Hz'],
+  ['Bus-Tie Interlocking','Per design'],
+  ['Main Bus Bar MCCB — short circuit','Per design (instantaneous)'],
+  ['Feeder MCCBs — overload test (spot check)','Per rating'],
+];
+const prb = document.getElementById('prot-body');
+PROT.forEach(([dev, sp]) => {
+  prb.innerHTML += `<tr>
+    <td>${dev}</td><td style="color:var(--teal-br)">${sp}</td>
+    <td><input type="text" placeholder="Recorded"/></td>
+    <td><input type="radio" name="prot_${dev}" value="pass"/></td>
+    <td><input type="radio" name="prot_${dev}" value="fail"/></td>
+    <td><input type="radio" name="prot_${dev}" value="na"/></td>
+    <td><input type="text" placeholder="Remark"/></td>
+  </tr>`;
+});
+
+// ── General checklist ──
+const GEN_ITEMS = [
+  'All panel doors closed and latched during operation',
+  'Busbars and connections — no signs of overheating',
+  'Metering instruments — voltmeters, ammeters, kW meters calibrated',
+  'Synchroscope / check synchronisation relay tested',
+  'Auto-synchroniser tested (if fitted)',
+  'Running hours meters operational',
+  'Power factor meter reading correctly',
+  'All labelling and circuit identification correct',
+  'Insulation resistance of main busbars ≥ 1 MΩ',
+  'Emergency stop / blackout buttons tested',
+  'Navigation / communication systems on UPS verified',
+];
+const sgb = document.getElementById('sb-gen-body');
+GEN_ITEMS.forEach((item, i) => {
+  sgb.innerHTML += `<tr>
+    <td>${item}</td>
+    <td><input type="radio" name="gen${i}" value="pass"/></td>
+    <td><input type="radio" name="gen${i}" value="fail"/></td>
+    <td><input type="radio" name="gen${i}" value="na"/></td>
+    <td><input type="text" placeholder="Remark"/></td>
+  </tr>`;
+});
+
+// ── Auto-save ──
+['sb-details','sb-bustie','sb-deadbus','sb-shore','sb-protection','sb-general','sb-result'].forEach(id => autoSaveForm(id, id));
+
+function exportSbExcel() {
+  const proj = getProject();
+  exportExcel([
+    { name:'Protection Relays', data: [...document.querySelectorAll('#prot-body tr')].map((tr,i)=>({
+        Device: PROT[i][0], SetPoint: PROT[i][1],
+        Recorded: tr.cells[2].querySelector('input')?.value||'',
+        Result: tr.querySelector('input:checked')?.value||'',
+      }))
+    },
+    { name:'Pref. Trip', data: [...document.querySelectorAll('#pref-trip-body tr')].map((tr,i)=>({
+        Load: PT_LOADS[i][0], Priority: PT_LOADS[i][1],
+        SetPoint: PT_LOADS[i][2],
+        Recorded: tr.cells[4].querySelector('input')?.value||'',
+        TimeSec: tr.cells[5].querySelector('input')?.value||'',
+        Result: tr.querySelector('input:checked')?.value||'',
+      }))
+    },
+  ], `Switchboard_${proj.vesselName||'vessel'}.xlsx`);
+}
+</script>
+</body>
+</html>

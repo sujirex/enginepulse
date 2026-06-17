@@ -97,6 +97,26 @@
     <div class="grid-4" id="stats-row"></div>
   </div>
 
+  <!-- Data Backup -->
+  <div class="section">
+    <div class="section-title">Data Backup &amp; Restore</div>
+    <div class="card">
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px">All EnginePulse data is stored in your browser's local storage. Export a backup before clearing your browser, switching devices, or sharing the project with another inspector.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="exportAllData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export All Data (JSON)
+        </button>
+        <label class="btn btn-outline" style="cursor:pointer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import Backup (JSON)
+          <input type="file" accept=".json" style="display:none" onchange="importData(this.files[0])"/>
+        </label>
+      </div>
+      <p style="color:var(--text-dim);font-size:11px;margin-top:10px">⚠️ Importing will overwrite all current data and reload the page.</p>
+    </div>
+  </div>
+
 </div>
 
 <footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse v1.0 &nbsp;·&nbsp; <a href="guide.html">User Guide</a></footer>
@@ -106,12 +126,14 @@
 buildNavbar('dashboard');
 
 const MODULES = [
-  { key:'commissioning', icon:'🔧', title:'Commissioning',     href:'commissioning.html', desc:'Pre-start checklists, safety device trips, alarm tests, first fire record' },
-  { key:'dgtest',        icon:'⚡', title:'D.G. Load Test',    href:'dgtest.html',        desc:'Step load 0–110%, voltage/freq regulation, parallel ops, pass/fail' },
-  { key:'seatrial',      icon:'🚢', title:'Sea Trial',         href:'seatrial.html',      desc:'Speed trial, crash stop, maneuvering, fuel consumption, endurance run' },
-  { key:'longtrial',     icon:'⏱️', title:'Long Trial',        href:'longtrial.html',     desc:'4/8/12-hr endurance, periodic readings, live trend chart' },
-  { key:'predictive',    icon:'🔮', title:'Predictive',        href:'predictive.html',    desc:'Running hours, maintenance schedule, performance trends, RUL estimator' },
-  { key:'signoff',       icon:'✍️', title:'Surveyor Sign-off', href:'signoff.html',       desc:'Digital signature, stamp, witness, generate class-ready signed PDF' },
+  { key:'commissioning', icon:'🔧', title:'Commissioning',       href:'commissioning.html',  desc:'Pre-start checklists, safety device trips, alarm tests, fuel changeover, first fire' },
+  { key:'dgtest',        icon:'⚡', title:'D.G. Load Test',      href:'dgtest.html',         desc:'Per-DG step load 0–110%, governor test, megger, voltage/freq regulation' },
+  { key:'emergencyGen',  icon:'🚨', title:'Emergency Generator', href:'emergencyGen.html',   desc:'Auto-start blackout test, step load, safety trips, SOLAS ≤45 sec compliance' },
+  { key:'switchboard',   icon:'🔌', title:'Main Switchboard',    href:'switchboard.html',    desc:'Bus-tie, preferential trip, shore connection, protection relay tests' },
+  { key:'seatrial',      icon:'🚢', title:'Sea Trial',           href:'seatrial.html',       desc:'Speed trial, crash stop, cylinder temps, steering, vibration, fuel consumption' },
+  { key:'longtrial',     icon:'⏱️', title:'Long Trial',          href:'longtrial.html',      desc:'4/8/12-hr endurance, periodic readings, live trend chart' },
+  { key:'predictive',    icon:'🔮', title:'Predictive',          href:'predictive.html',     desc:'Running hours, maintenance schedule, performance trends, RUL estimator' },
+  { key:'signoff',       icon:'✍️', title:'Surveyor Sign-off',   href:'signoff.html',        desc:'Digital signature, witness, generate class-ready signed PDF' },
 ];
 
 function renderModules() {

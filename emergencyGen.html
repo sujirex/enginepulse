@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EnginePulse — Emergency Generator Test</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="navbar"></div>
+<div class="page-sm">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> › Emergency Generator Test</div>
+  <div class="page-header">
+    <div class="page-title">🔴 Emergency Generator Test</div>
+    <div class="page-sub">Auto-start · Blackout test · Load test · Safety trips · Governor · Insulation resistance</div>
+  </div>
+  <div id="vessel-strip"></div>
+
+  <!-- A. Generator Particulars -->
+  <div class="section">
+    <div class="section-title">A. Emergency Generator Particulars</div>
+    <div class="card">
+      <form id="eg-particulars">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Engine Maker</label><input type="text" name="egMaker" placeholder="Caterpillar / Cummins / Volvo"/></div>
+          <div class="form-group"><label>Engine Model</label><input type="text" name="egModel" placeholder="Model No."/></div>
+          <div class="form-group"><label>Serial No.</label><input type="text" name="egSerial" placeholder="Serial"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Generator Maker</label><input type="text" name="egGenMaker" placeholder="Stamford / Leroy Somer"/></div>
+          <div class="form-group"><label>Rated kVA</label><input type="number" name="egKva" placeholder="kVA"/></div>
+          <div class="form-group"><label>Rated kW</label><input type="number" name="egKw" placeholder="kW"/></div>
+        </div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>Voltage (V)</label><input type="number" name="egVoltage" placeholder="440"/></div>
+          <div class="form-group"><label>Frequency (Hz)</label><input type="number" name="egHz" placeholder="60"/></div>
+          <div class="form-group"><label>Power Factor</label><input type="number" name="egPf" placeholder="0.8" step="0.01"/></div>
+          <div class="form-group"><label>Rated RPM</label><input type="number" name="egRpm" placeholder="1800"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Location</label><input type="text" name="egLocation" placeholder="Emergency Generator Room / Deck"/></div>
+          <div class="form-group"><label>Fuel Type</label><input type="text" name="egFuel" placeholder="MDO / Diesel"/></div>
+          <div class="form-group"><label>Starting Method</label><input type="text" name="egStartMethod" placeholder="Electric / Hydraulic / Manual"/></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- B. Pre-Start Checklist -->
+  <div class="section">
+    <div class="section-title">B. Pre-Start Checklist</div>
+    <div class="card">
+      <form id="eg-prestart">
+        <table class="data-table">
+          <thead><tr><th>Item</th><th>Pass</th><th>Fail</th><th>N/A</th><th>Remarks</th></tr></thead>
+          <tbody id="eg-prestart-body"></tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+
+  <!-- C. Auto-Start / Blackout Test -->
+  <div class="section">
+    <div class="section-title">C. Auto-Start on Blackout Test</div>
+    <div class="callout">Per SOLAS — emergency generator must auto-start and restore power within 45 seconds of main power failure.</div>
+    <div class="card">
+      <form id="eg-blackout">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Test Date &amp; Time</label><input type="datetime-local" name="blackoutDate"/></div>
+          <div class="form-group"><label>Initial Voltage (V)</label><input type="number" name="blackoutInitV" placeholder="Before blackout"/></div>
+          <div class="form-group"><label>Initial Hz</label><input type="number" name="blackoutInitHz" placeholder="Before blackout" step="0.1"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Main Power Failure Time</label><input type="time" name="blackoutFailTime"/></div>
+          <div class="form-group"><label>E.G. Start Time</label><input type="time" name="blackoutStartTime"/></div>
+          <div class="form-group"><label>Power Restored Time</label><input type="time" name="blackoutRestoreTime"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Start-to-Power Time (sec)</label><input type="number" name="startToPower" placeholder="≤ 45 sec" id="stp"/></div>
+          <div class="form-group"><label>Result</label><div id="solas-badge" style="margin-top:6px"></div></div>
+          <div class="form-group"><label>Starting Air Pressure (bar)</label><input type="number" name="startAir" placeholder="bar" step="0.1"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Voltage at Pickup (V)</label><input type="number" name="pickupV" placeholder="V at restoration"/></div>
+          <div class="form-group"><label>Frequency at Pickup (Hz)</label><input type="number" name="pickupHz" placeholder="Hz at restoration" step="0.1"/></div>
+          <div class="form-group"><label>No. of Auto-Start Attempts</label><input type="number" name="startAttempts" placeholder="1"/></div>
+        </div>
+        <div class="form-group"><label>Observations</label><textarea name="blackoutObs" placeholder="Any abnormalities during blackout test..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- D. Load Test -->
+  <div class="section">
+    <div class="section-title">D. Step Load Test</div>
+    <div class="card">
+      <table class="data-table" id="eg-load-table">
+        <thead>
+          <tr>
+            <th>Load Step</th><th>kW Target</th><th>kW Actual</th><th>kVA</th>
+            <th>Voltage (V)</th><th>Hz</th><th>PF</th><th>RPM</th><th>Exhaust (°C)</th><th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>No Load (0%)</td><td id="eg-t0">—</td><td><input type="number" class="eg-kw" placeholder="0"/></td><td class="eg-kva">—</td><td><input type="number" placeholder="V" class="eg-v"/></td><td><input type="number" placeholder="Hz" class="eg-hz" step="0.1"/></td><td><input type="number" placeholder="PF" class="eg-pf" step="0.01"/></td><td><input type="number" placeholder="RPM"/></td><td><input type="number" placeholder="°C"/></td><td class="eg-res">—</td></tr>
+          <tr><td>25%</td><td class="eg-tgt" data-pct="25">—</td><td><input type="number" class="eg-kw" placeholder="kW"/></td><td class="eg-kva">—</td><td><input type="number" placeholder="V" class="eg-v"/></td><td><input type="number" placeholder="Hz" class="eg-hz" step="0.1"/></td><td><input type="number" placeholder="PF" class="eg-pf" step="0.01"/></td><td><input type="number" placeholder="RPM"/></td><td><input type="number" placeholder="°C"/></td><td class="eg-res">—</td></tr>
+          <tr><td>50%</td><td class="eg-tgt" data-pct="50">—</td><td><input type="number" class="eg-kw" placeholder="kW"/></td><td class="eg-kva">—</td><td><input type="number" placeholder="V" class="eg-v"/></td><td><input type="number" placeholder="Hz" class="eg-hz" step="0.1"/></td><td><input type="number" placeholder="PF" class="eg-pf" step="0.01"/></td><td><input type="number" placeholder="RPM"/></td><td><input type="number" placeholder="°C"/></td><td class="eg-res">—</td></tr>
+          <tr><td>75%</td><td class="eg-tgt" data-pct="75">—</td><td><input type="number" class="eg-kw" placeholder="kW"/></td><td class="eg-kva">—</td><td><input type="number" placeholder="V" class="eg-v"/></td><td><input type="number" placeholder="Hz" class="eg-hz" step="0.1"/></td><td><input type="number" placeholder="PF" class="eg-pf" step="0.01"/></td><td><input type="number" placeholder="RPM"/></td><td><input type="number" placeholder="°C"/></td><td class="eg-res">—</td></tr>
+          <tr><td>100%</td><td class="eg-tgt" data-pct="100">—</td><td><input type="number" class="eg-kw" placeholder="kW"/></td><td class="eg-kva">—</td><td><input type="number" placeholder="V" class="eg-v"/></td><td><input type="number" placeholder="Hz" class="eg-hz" step="0.1"/></td><td><input type="number" placeholder="PF" class="eg-pf" step="0.01"/></td><td><input type="number" placeholder="RPM"/></td><td><input type="number" placeholder="°C"/></td><td class="eg-res">—</td></tr>
+          <tr><td>110%</td><td class="eg-tgt" data-pct="110">—</td><td><input type="number" class="eg-kw" placeholder="kW"/></td><td class="eg-kva">—</td><td><input type="number" placeholder="V" class="eg-v"/></td><td><input type="number" placeholder="Hz" class="eg-hz" step="0.1"/></td><td><input type="number" placeholder="PF" class="eg-pf" step="0.01"/></td><td><input type="number" placeholder="RPM"/></td><td><input type="number" placeholder="°C"/></td><td class="eg-res">—</td></tr>
+        </tbody>
+      </table>
+      <div class="form-row col-3" style="margin-top:14px">
+        <div class="form-group"><label>Voltage Regulation %</label><div id="eg-vr">—</div></div>
+        <div class="form-group"><label>Frequency Regulation %</label><div id="eg-fr">—</div></div>
+        <div class="form-group"><label>Class Limit (both ≤ ±5%)</label><div id="eg-reg-badge">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E. Governor / Load Acceptance -->
+  <div class="section">
+    <div class="section-title">E. Governor / Load Acceptance Test</div>
+    <div class="card">
+      <form id="eg-governor">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Pre-test Load (kW)</label><input type="number" name="govPreLoad" placeholder="kW"/></div>
+          <div class="form-group"><label>Pre-test Voltage (V)</label><input type="number" name="govPreV" placeholder="V"/></div>
+          <div class="form-group"><label>Pre-test Hz</label><input type="number" name="govPreHz" placeholder="Hz" step="0.1"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Throw-off Load (kW)</label><input type="number" name="govThrowOff" placeholder="100% kW"/></div>
+          <div class="form-group"><label>Max Voltage after throw-off (V)</label><input type="number" name="govMaxV" placeholder="V"/></div>
+          <div class="form-group"><label>Max Hz after throw-off</label><input type="number" name="govMaxHz" placeholder="Hz" step="0.1"/></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Voltage Recovery Time (sec)</label><input type="number" name="govVRecTime" placeholder="sec" step="0.1"/></div>
+          <div class="form-group"><label>Hz Recovery Time (sec)</label><input type="number" name="govHzRecTime" placeholder="sec" step="0.1"/></div>
+          <div class="form-group"><label>Class Limit</label><div style="margin-top:6px;font-size:12px;color:var(--text-dim)">V ≤ ±10%, Hz ≤ ±10%<br/>Recovery ≤ 5 sec</div></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Throw-on Load (kW)</label><input type="number" name="govThrowOn" placeholder="kW (sudden load)"/></div>
+          <div class="form-group"><label>Min Voltage after throw-on (V)</label><input type="number" name="govMinV" placeholder="V"/></div>
+          <div class="form-group"><label>Min Hz after throw-on</label><input type="number" name="govMinHz" placeholder="Hz" step="0.1"/></div>
+        </div>
+        <div class="form-group"><label>Governor Test Result / Remarks</label><textarea name="govRemarks" placeholder="Governor response, hunting, stability observations..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- F. Safety Device Trips -->
+  <div class="section">
+    <div class="section-title">F. Safety Device Trip Test</div>
+    <div class="card">
+      <table class="data-table">
+        <thead><tr><th>Device</th><th>Set Point</th><th>Recorded Value</th><th>Pass</th><th>Fail</th><th>N/A</th><th>Remarks</th></tr></thead>
+        <tbody id="eg-safety-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- G. Insulation Resistance (Megger) -->
+  <div class="section">
+    <div class="section-title">G. Insulation Resistance (Megger Test)</div>
+    <div class="card">
+      <form id="eg-megger">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Test Voltage (V)</label><input type="number" name="megVolt" placeholder="500 / 1000 V"/></div>
+          <div class="form-group"><label>Ambient Temp (°C)</label><input type="number" name="megTemp" placeholder="°C"/></div>
+          <div class="form-group"><label>Humidity (%)</label><input type="number" name="megHumidity" placeholder="%"/></div>
+        </div>
+        <table class="data-table" style="margin-top:10px">
+          <thead><tr><th>Measurement Point</th><th>Phase-Earth (MΩ)</th><th>Min Limit (MΩ)</th><th>Result</th><th>Remarks</th></tr></thead>
+          <tbody id="eg-megger-body"></tbody>
+        </table>
+        <div class="form-group" style="margin-top:10px"><label>Megger Test Observations</label><textarea name="megObs" placeholder="Overall insulation condition..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- H. Auxiliary Tests Checklist -->
+  <div class="section">
+    <div class="section-title">H. Auxiliary Tests Checklist</div>
+    <div class="card">
+      <form id="eg-aux">
+        <table class="data-table">
+          <thead><tr><th>Test Item</th><th>Pass</th><th>Fail</th><th>N/A</th><th>Remarks</th></tr></thead>
+          <tbody id="eg-aux-body"></tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+
+  <!-- I. Overall Result -->
+  <div class="section">
+    <div class="section-title">I. Overall Result</div>
+    <div class="card">
+      <form id="eg-result">
+        <div class="form-row col-2">
+          <div class="form-group"><label>Test Completion Date &amp; Time</label><input type="datetime-local" name="egCompleted"/></div>
+          <div class="form-group"><label>Overall Result</label>
+            <select name="egOverall">
+              <option value="">— Select —</option>
+              <option value="pass">PASS — Satisfactory</option>
+              <option value="conditional">CONDITIONAL PASS — Minor items pending</option>
+              <option value="fail">FAIL — Retrial required</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Outstanding Items / Conditions</label><textarea name="egOutstanding" placeholder="Any items deferred for later rectification..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="exportEgExcel()">📊 Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-outline" onclick="setModuleStatus('emergencyGen','done');toast('Marked complete','pass')">✓ Mark Complete</button>
+  </div>
+</div>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+buildNavbar('emergencyGen');
+document.getElementById('vessel-strip').innerHTML = buildVesselStrip();
+
+// ── Pre-start items ──
+const PRE_ITEMS = [
+  'Fuel level in service tank checked and adequate',
+  'Lube oil level in sump at correct level',
+  'Coolant level in header tank correct',
+  'Battery charge level checked (starting batteries)',
+  'Fuel system vented and free of air',
+  'Starting air pressure adequate (if air start)',
+  'Engine room ventilation dampers — emergency position checked',
+  'Control panel: no fault alarms present',
+  'AVR (Automatic Voltage Regulator) in AUTO mode',
+  'Governor in AUTO mode',
+  'Electrical connections checked and tight',
+  'Overcurrent / earth fault relay settings verified',
+];
+const prb = document.getElementById('eg-prestart-body');
+PRE_ITEMS.forEach((item, i) => {
+  prb.innerHTML += `<tr>
+    <td>${item}</td>
+    <td><input type="radio" name="pre${i}" value="pass"/></td>
+    <td><input type="radio" name="pre${i}" value="fail"/></td>
+    <td><input type="radio" name="pre${i}" value="na"/></td>
+    <td><input type="text" placeholder="Remark"/></td>
+  </tr>`;
+});
+
+// ── Safety devices ──
+const SAFETY = [
+  ['Overspeed trip','103–110% rated RPM'],
+  ['Low lube oil pressure trip','≤ 2.0 bar'],
+  ['High coolant temp trip','≥ 95°C'],
+  ['High exhaust temp alarm','Maker's limit'],
+  ['Earth fault indication','Per design'],
+  ['Overcurrent trip (MCCB)','125% In'],
+  ['Reverse power relay','5% rated kW'],
+  ['Under voltage relay','85% rated V'],
+  ['Loss of excitation relay','Per design'],
+];
+const sfb = document.getElementById('eg-safety-body');
+SAFETY.forEach(([dev, sp]) => {
+  sfb.innerHTML += `<tr>
+    <td>${dev}</td><td>${sp}</td>
+    <td><input type="text" placeholder="Recorded"/></td>
+    <td><input type="radio" name="sf_${dev}" value="pass"/></td>
+    <td><input type="radio" name="sf_${dev}" value="fail"/></td>
+    <td><input type="radio" name="sf_${dev}" value="na"/></td>
+    <td><input type="text" placeholder="Remark"/></td>
+  </tr>`;
+});
+
+// ── Megger points ──
+const MEG_POINTS = [
+  ['Stator Winding (Ph-E)','≥ 1 MΩ'],
+  ['Field Winding (Ph-E)','≥ 0.5 MΩ'],
+  ['Main Bus Bar (Ph-E)','≥ 1 MΩ'],
+  ['Main Bus Bar (Ph-Ph)','≥ 1 MΩ'],
+  ['Feeder Cables to E. Switchboard','≥ 1 MΩ'],
+  ['Starting Battery Circuit','≥ 0.5 MΩ'],
+];
+const mgb = document.getElementById('eg-megger-body');
+MEG_POINTS.forEach(([pt, lim]) => {
+  mgb.innerHTML += `<tr>
+    <td>${pt}</td>
+    <td><input type="number" placeholder="MΩ" step="0.01"/></td>
+    <td style="color:var(--teal-br)">${lim}</td>
+    <td>—</td>
+    <td><input type="text" placeholder="Remark"/></td>
+  </tr>`;
+});
+// Megger result badges
+document.getElementById('eg-megger-body').querySelectorAll('tr').forEach(tr => {
+  const inp = tr.cells[1].querySelector('input');
+  const lim = parseFloat(tr.cells[2].textContent);
+  if (inp) inp.addEventListener('input', () => {
+    const v = parseFloat(inp.value);
+    tr.cells[3].innerHTML = isNaN(v) ? '—' : v >= lim
+      ? '<span class="badge badge-pass">PASS</span>'
+      : '<span class="badge badge-fail">FAIL</span>';
+  });
+});
+
+// ── Aux tests ──
+const AUX = [
+  'Manual start test performed',
+  'Auto-start battery charger operation verified',
+  'Emergency lighting circuits tested on E.G. supply',
+  'Fire pump operation on E.G. supply verified',
+  'Emergency bilge pump on E.G. supply verified',
+  'GMDSS / navigation lights on E.G. supply verified',
+  'Automatic transfer back to main power after restoration tested',
+  'Running hour meter and gauges operational',
+];
+const axb = document.getElementById('eg-aux-body');
+AUX.forEach((item, i) => {
+  axb.innerHTML += `<tr>
+    <td>${item}</td>
+    <td><input type="radio" name="aux${i}" value="pass"/></td>
+    <td><input type="radio" name="aux${i}" value="fail"/></td>
+    <td><input type="radio" name="aux${i}" value="na"/></td>
+    <td><input type="text" placeholder="Remark"/></td>
+  </tr>`;
+});
+
+// ── Auto-save all forms ──
+autoSaveForm('eg-particulars','eg-particulars');
+autoSaveForm('eg-prestart','eg-prestart');
+autoSaveForm('eg-blackout','eg-blackout');
+autoSaveForm('eg-governor','eg-governor');
+autoSaveForm('eg-result','eg-result');
+autoSaveForm('eg-megger','eg-megger');
+autoSaveForm('eg-aux','eg-aux');
+
+// ── SOLAS badge (≤45 sec) ──
+document.getElementById('stp').addEventListener('input', function() {
+  const v = parseFloat(this.value);
+  document.getElementById('solas-badge').innerHTML = isNaN(v) ? '—'
+    : v <= 45 ? '<span class="badge badge-pass">✓ PASS ≤45 sec</span>'
+               : '<span class="badge badge-fail">✗ FAIL &gt;45 sec</span>';
+});
+
+// ── Load table: auto kVA ──
+const ratedKw = () => parseFloat(document.querySelector('[name="egKw"]')?.value) || 0;
+const ratedPf = () => parseFloat(document.querySelector('[name="egPf"]')?.value) || 0.8;
+const noLoadV  = () => parseFloat(document.querySelector('.eg-v')?.value) || 0;
+const fullLoadV = () => {
+  const vInputs = document.querySelectorAll('.eg-v');
+  return parseFloat(vInputs[vInputs.length-2]?.value) || 0; // 100% step (index 4)
+};
+const noLoadHz  = () => parseFloat(document.querySelector('.eg-hz')?.value) || 0;
+const fullLoadHz = () => {
+  const hInputs = document.querySelectorAll('.eg-hz');
+  return parseFloat(hInputs[hInputs.length-2]?.value) || 0;
+};
+
+document.querySelectorAll('.eg-kw').forEach(inp => {
+  inp.addEventListener('input', () => {
+    const row = inp.closest('tr');
+    const kw = parseFloat(inp.value);
+    const pf = parseFloat(row.querySelector('.eg-pf')?.value) || ratedPf();
+    row.querySelector('.eg-kva').textContent = (!isNaN(kw) && pf) ? (kw/pf).toFixed(1) : '—';
+    updateReg();
+  });
+});
+document.querySelectorAll('.eg-pf').forEach(inp => inp.addEventListener('input', updateReg));
+document.querySelectorAll('.eg-v, .eg-hz').forEach(inp => inp.addEventListener('input', updateReg));
+
+// Target kW cells
+document.querySelectorAll('.eg-tgt').forEach(td => {
+  const pct = parseInt(td.dataset.pct);
+  const kw = ratedKw();
+  if (kw) td.textContent = (kw * pct / 100).toFixed(1);
+});
+document.querySelector('[name="egKw"]')?.addEventListener('input', function() {
+  document.querySelectorAll('.eg-tgt').forEach(td => {
+    const pct = parseInt(td.dataset.pct);
+    td.textContent = (parseFloat(this.value)||0) * pct / 100 + ' kW';
+  });
+});
+
+function updateReg() {
+  const vInputs = [...document.querySelectorAll('.eg-v')];
+  const hInputs = [...document.querySelectorAll('.eg-hz')];
+  const nlV = parseFloat(vInputs[0]?.value);
+  const flV = parseFloat(vInputs[4]?.value);
+  const nlH = parseFloat(hInputs[0]?.value);
+  const flH = parseFloat(hInputs[4]?.value);
+  if (!isNaN(nlV) && !isNaN(flV) && flV) {
+    const vr = ((nlV - flV) / flV * 100).toFixed(2);
+    document.getElementById('eg-vr').innerHTML = `<strong>${vr}%</strong>`;
+    const fr = (!isNaN(nlH) && !isNaN(flH) && flH) ? ((nlH - flH) / flH * 100).toFixed(2) : null;
+    if (fr) document.getElementById('eg-fr').innerHTML = `<strong>${fr}%</strong>`;
+    const vrPass = Math.abs(parseFloat(vr)) <= 5;
+    const frPass = fr ? Math.abs(parseFloat(fr)) <= 5 : true;
+    document.getElementById('eg-reg-badge').innerHTML = (vrPass && frPass)
+      ? '<span class="badge badge-pass">✓ PASS</span>'
+      : '<span class="badge badge-fail">✗ FAIL</span>';
+  }
+}
+
+function exportEgExcel() {
+  const proj = getProject();
+  exportExcel([
+    { name:'Pre-Start', data: [...document.querySelectorAll('#eg-prestart-body tr')].map((tr,i)=>({
+        Item: PRE_ITEMS[i], Result: tr.querySelector('input:checked')?.value||'', Remarks: tr.querySelectorAll('input[type=text]')[0]?.value||''
+      }))
+    },
+    { name:'Blackout Test', data:[{
+        Date: document.querySelector('[name="blackoutDate"]')?.value||'',
+        'Start-to-Power (sec)': document.querySelector('[name="startToPower"]')?.value||'',
+        'Voltage at Pickup': document.querySelector('[name="pickupV"]')?.value||'',
+        'Hz at Pickup': document.querySelector('[name="pickupHz"]')?.value||'',
+        Observations: document.querySelector('[name="blackoutObs"]')?.value||'',
+      }]
+    },
+    { name:'Load Test', data: [...document.querySelectorAll('#eg-load-table tbody tr')].map(tr=>{
+        const cells = tr.querySelectorAll('td,input');
+        return {
+          Step: tr.cells[0].textContent, 'kW Target': tr.cells[1].textContent,
+          'kW Actual': tr.cells[2].querySelector('input')?.value||'',
+          'Voltage': tr.cells[4].querySelector('input')?.value||'',
+          'Hz': tr.cells[5].querySelector('input')?.value||'',
+        };
+      })
+    },
+  ], `EmergencyGen_${proj.vesselName||'vessel'}.xlsx`);
+}
+</script>
+</body>
+</html>

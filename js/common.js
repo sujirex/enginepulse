@@ -49,6 +49,8 @@ const NAV_LINKS = [
   { href: 'index.html',         label: 'Dashboard',    key: 'dashboard' },
   { href: 'commissioning.html', label: 'Commissioning',key: 'commissioning' },
   { href: 'dgtest.html',        label: 'D.G. Test',    key: 'dgtest' },
+  { href: 'emergencyGen.html',  label: 'Emerg. Gen',   key: 'emergencyGen' },
+  { href: 'switchboard.html',   label: 'Switchboard',  key: 'switchboard' },
   { href: 'seatrial.html',      label: 'Sea Trial',    key: 'seatrial' },
   { href: 'longtrial.html',     label: 'Long Trial',   key: 'longtrial' },
   { href: 'predictive.html',    label: 'Predictive',   key: 'predictive' },
@@ -235,6 +237,41 @@ function toast(msg, type = 'info') {
   document.head.appendChild(style);
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 3500);
+}
+
+// ── JSON Backup / Restore ───────────────────────────
+function exportAllData() {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('ep-')) keys.push(k);
+  }
+  const data = {};
+  keys.forEach(k => { try { data[k] = JSON.parse(localStorage.getItem(k)); } catch { data[k] = localStorage.getItem(k); } });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const proj = getProject();
+  a.href = url; a.download = `EnginePulse_${proj.vesselName||'backup'}_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Data exported successfully', 'pass');
+}
+
+function importData(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (typeof data !== 'object') throw new Error('Invalid format');
+      Object.entries(data).forEach(([k, v]) => {
+        if (k.startsWith('ep-')) localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
+      });
+      toast('Data imported — reloading…', 'pass');
+      setTimeout(() => location.reload(), 1000);
+    } catch { toast('Import failed: invalid JSON file', 'fail'); }
+  };
+  reader.readAsText(file);
 }
 
 // ── Module status dots for dashboard ────────────────

@@ -7,319 +7,410 @@
   <link rel="stylesheet" href="css/style.css"/>
   <style>
     .guide-layout { display:grid; grid-template-columns:220px 1fr; gap:28px; align-items:start; }
-    .toc { position:sticky; top:80px; padding:18px; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; }
-    .toc-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text-dim); margin-bottom:10px; }
-    .toc a { display:block; padding:5px 8px; border-radius:5px; font-size:12px; color:var(--text-muted); text-decoration:none; border-left:2px solid transparent; }
-    .toc a:hover { color:var(--teal-br); border-left-color:var(--teal-br); background:var(--bg-raised); }
-    .toc a.sub { padding-left:18px; font-size:11px; }
-    h2.guide-h { font-size:20px; color:var(--teal-br); margin:0 0 8px; padding-bottom:8px; border-bottom:1px solid var(--border); scroll-margin-top:80px; }
-    h3.guide-h3 { font-size:14px; font-weight:700; color:var(--text); margin:18px 0 6px; scroll-margin-top:80px; }
-    .guide-section { margin-bottom:36px; }
-    .step { display:flex; gap:12px; margin-bottom:10px; }
-    .step-num { width:26px; height:26px; border-radius:50%; background:var(--teal); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .tip { padding:10px 14px; background:rgba(13,200,200,.07); border-left:3px solid var(--teal); border-radius:0 6px 6px 0; font-size:13px; margin:10px 0; }
-    .warn { padding:10px 14px; background:rgba(251,191,36,.07); border-left:3px solid #fbbf24; border-radius:0 6px 6px 0; font-size:13px; margin:10px 0; }
-    .field-row { display:flex; gap:8px; align-items:flex-start; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px; }
-    .field-name { font-weight:600; min-width:160px; color:var(--teal-br); }
-    .kbd { display:inline-block; padding:2px 6px; background:var(--bg-raised); border:1px solid var(--border); border-radius:4px; font-family:monospace; font-size:11px; }
-    @media(max-width:768px){ .guide-layout{grid-template-columns:1fr;} .toc{position:static;} }
+    .guide-toc { position:sticky; top:72px; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; font-size:13px; }
+    .guide-toc h4 { margin:0 0 12px; font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--text-dim); }
+    .guide-toc a { display:block; color:var(--text); text-decoration:none; padding:5px 8px; border-radius:6px; transition:background .15s; line-height:1.4; }
+    .guide-toc a:hover { background:var(--bg-raised); color:var(--teal-br); }
+    .guide-toc a.sub { padding-left:18px; font-size:12px; color:var(--text-dim); }
+    .guide-section { scroll-margin-top:80px; margin-bottom:36px; }
+    .guide-section h2 { font-size:18px; margin-bottom:12px; color:var(--teal-br); }
+    .guide-section h3 { font-size:14px; margin:18px 0 8px; color:var(--text); border-left:3px solid var(--teal); padding-left:10px; }
+    .guide-section p, .guide-section li { color:var(--text-dim); font-size:13px; line-height:1.7; margin-bottom:8px; }
+    .guide-section ul { margin-left:18px; }
+    .tip { background:rgba(13,200,200,.07); border:1px solid rgba(13,200,200,.2); border-radius:8px; padding:10px 14px; font-size:12px; color:var(--teal-br); margin:10px 0; }
+    .warn { background:rgba(234,179,8,.07); border:1px solid rgba(234,179,8,.2); border-radius:8px; padding:10px 14px; font-size:12px; color:#f59e0b; margin:10px 0; }
+    .badge-inline { display:inline-block; padding:1px 7px; border-radius:4px; font-size:11px; font-weight:600; margin:0 2px; }
+    .b-pass { background:rgba(34,197,94,.15); color:#22c55e; }
+    .b-fail { background:rgba(239,68,68,.15); color:#ef4444; }
+    .b-solas { background:rgba(10,150,150,.15); color:#0DC8C8; }
+    .kbd { background:var(--bg-raised); border:1px solid var(--border); border-radius:4px; padding:1px 6px; font-size:11px; font-family:monospace; }
+    @media(max-width:680px){ .guide-layout{grid-template-columns:1fr} .guide-toc{display:none} }
   </style>
 </head>
 <body>
 <div id="navbar"></div>
-<div class="page-sm">
-  <div class="breadcrumb"><a href="index.html">Dashboard</a> › User Guide</div>
+<div class="page" style="max-width:1100px">
+  <div class="breadcrumb"><a href="index.html">Dashboard</a> &rsaquo; User Guide</div>
   <div class="page-header">
-    <div class="page-title">📖 User Guide</div>
+    <div class="page-title">&#128214; User Guide</div>
     <div class="page-sub">Complete reference for all EnginePulse modules</div>
   </div>
 
   <div class="guide-layout">
+
     <!-- TOC -->
-    <aside class="toc">
-      <div class="toc-title">Contents</div>
+    <nav class="guide-toc">
+      <h4>Contents</h4>
       <a href="#overview">Overview</a>
-      <a href="#setup">Getting Started</a>
+      <a href="#start">Getting Started</a>
       <a href="#dashboard">Dashboard</a>
-      <a href="#commissioning">Commissioning</a>
+      <a href="#commissioning">Commissioning Test</a>
+      <a class="sub" href="#fuel-changeover">Fuel Changeover</a>
       <a href="#dgtest">D.G. Load Test</a>
+      <a class="sub" href="#dg-tabs">Per-DG Tabs</a>
+      <a class="sub" href="#dg-governor">Governor Test</a>
+      <a class="sub" href="#dg-megger">Megger (IR)</a>
+      <a href="#emergencygen">Emergency Generator</a>
+      <a class="sub" href="#eg-solas">SOLAS Compliance</a>
+      <a href="#switchboard">Main Switchboard</a>
       <a href="#seatrial">Sea Trial</a>
+      <a class="sub" href="#cyl-temps">Cylinder Temps</a>
+      <a class="sub" href="#steering">Steering Gear</a>
+      <a class="sub" href="#vibration">Vibration (ISO 6954)</a>
       <a href="#longtrial">Long Trial</a>
       <a href="#predictive">Predictive Analysis</a>
       <a href="#signoff">Surveyor Sign-off</a>
-      <a href="#export">Export Options</a>
-      <a href="#tips">Tips & Offline Use</a>
-    </aside>
+      <a class="sub" href="#combined-pdf">Combined Report PDF</a>
+      <a href="#backup">Data Backup &amp; Restore</a>
+      <a href="#tips">Tips &amp; Offline Use</a>
+    </nav>
 
     <!-- Content -->
     <div>
 
-      <!-- Overview -->
       <div class="guide-section" id="overview">
-        <h2 class="guide-h">Overview</h2>
-        <p>EnginePulse is a comprehensive ship engine and D.G. test management application designed for marine engineers, superintendents, and class surveyors. It covers the complete lifecycle of machinery commissioning from initial pre-start checks through long-endurance trials and predictive maintenance.</p>
-        <p style="margin-top:10px">All data is stored locally in your browser (no internet connection required after loading). This makes it suitable for use at shipyards, anchorage, and sea trial operations where connectivity is limited.</p>
-        <div class="tip">💡 EnginePulse works fully offline once the page is loaded. Bookmark it for use without an internet connection.</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px">
-          <div class="card" style="text-align:center;padding:12px"><div style="font-size:20px">🔧</div><div style="font-size:12px;font-weight:600">6 Test Modules</div></div>
-          <div class="card" style="text-align:center;padding:12px"><div style="font-size:20px">📊</div><div style="font-size:12px;font-weight:600">Charts & Trends</div></div>
-          <div class="card" style="text-align:center;padding:12px"><div style="font-size:20px">📄</div><div style="font-size:12px;font-weight:600">PDF / Excel Export</div></div>
-          <div class="card" style="text-align:center;padding:12px"><div style="font-size:20px">✍️</div><div style="font-size:12px;font-weight:600">Digital Sign-off</div></div>
-          <div class="card" style="text-align:center;padding:12px"><div style="font-size:20px">🔒</div><div style="font-size:12px;font-weight:600">Offline / Secure</div></div>
-          <div class="card" style="text-align:center;padding:12px"><div style="font-size:20px">🌗</div><div style="font-size:12px;font-weight:600">Dark & Light Mode</div></div>
-        </div>
+        <h2>Overview</h2>
+        <p>EnginePulse is a browser-based engine and electrical test suite for marine vessels. It covers commissioning, diesel generator load tests, emergency generator, main switchboard, sea trial, long trial, and predictive analysis &mdash; all in one app.</p>
+        <p>All data is stored in your browser&rsquo;s local storage &mdash; no server, no login required. The app works fully offline once loaded. Use the Data Backup feature on the Dashboard to export your data before clearing your browser or switching devices.</p>
+        <div class="tip">EnginePulse is optimised for desktop browsers (Chrome / Edge). On tablets, use landscape orientation for the best experience.</div>
       </div>
 
-      <!-- Getting Started -->
-      <div class="guide-section" id="setup">
-        <h2 class="guide-h">Getting Started</h2>
-        <h3 class="guide-h3">Workflow</h3>
-        <div class="step"><div class="step-num">1</div><div>Open the <strong>Dashboard</strong> and fill in vessel details, main engine particulars, D.G. specs, and surveyor information.</div></div>
-        <div class="step"><div class="step-num">2</div><div>Run tests module by module — each page auto-saves as you type. Module status (Pending / In Progress / Done / Signed) reflects on the dashboard.</div></div>
-        <div class="step"><div class="step-num">3</div><div>Export data from each module as Excel sheets for your records.</div></div>
-        <div class="step"><div class="step-num">4</div><div>On the <strong>Sign-off</strong> page, the surveyor selects completed tests, draws their signature, and generates a signed PDF certificate.</div></div>
-        <h3 class="guide-h3">Dark / Light Mode</h3>
-        <p>Click the <kbd class="kbd">☀ / 🌙</kbd> toggle in the top-right of the navbar. Your preference is remembered across sessions.</p>
-        <h3 class="guide-h3">Data Storage</h3>
-        <p>All data is saved in your browser's <code>localStorage</code>. Data persists through page reloads and browser restarts. Clearing browser data will erase all entries — use the Excel export before clearing.</p>
-        <div class="warn">⚠️ Do not use Private / Incognito windows as localStorage is cleared when the window closes.</div>
+      <div class="guide-section" id="start">
+        <h2>Getting Started</h2>
+        <h3>Step 1 &mdash; Project Setup</h3>
+        <p>Open the <a href="index.html">Dashboard</a> and fill in the Project Setup form: vessel name, IMO, flag, class society, engine details, D.G. particulars, and surveyor information. Click <strong>Save Project</strong>. These details appear on every page header and are embedded in all PDF reports.</p>
+        <h3>Step 2 &mdash; Work Through Modules</h3>
+        <p>Click any test module card on the Dashboard. Each module is independent &mdash; start with Commissioning and work through in order, or jump directly to the test you need.</p>
+        <h3>Step 3 &mdash; Mark Complete</h3>
+        <p>Each module has a <strong>Mark Complete</strong> button. Click it after finishing the test. The Dashboard progress tiles update in real time. The status dot on each card changes from Pending to In Progress to Complete to Signed.</p>
+        <h3>Step 4 &mdash; Sign Off &amp; Export</h3>
+        <p>Once all required tests are done, go to <a href="signoff.html">Sign-off</a>, select the tests being certified, draw your signature, and generate either a signed PDF certificate or a full combined trial report.</p>
       </div>
 
-      <!-- Dashboard -->
       <div class="guide-section" id="dashboard">
-        <h2 class="guide-h">Dashboard</h2>
-        <p>The dashboard is the project setup page and status overview. Fill it in first before using any test module.</p>
-        <h3 class="guide-h3">Vessel Particulars</h3>
-        <div class="field-row"><div class="field-name">Vessel Name</div><div>Name of the ship being tested</div></div>
-        <div class="field-row"><div class="field-name">IMO Number</div><div>7-digit IMO vessel identification number</div></div>
-        <div class="field-row"><div class="field-name">Flag State</div><div>Country of registration (e.g., India, Panama)</div></div>
-        <div class="field-row"><div class="field-name">Class Society</div><div>IRS, Lloyd's, DNV, BV, ABS, etc.</div></div>
-        <div class="field-row"><div class="field-name">Hull Number</div><div>Shipyard build number</div></div>
-        <div class="field-row"><div class="field-name">Build Year</div><div>Year of construction</div></div>
-        <h3 class="guide-h3">Main Engine</h3>
-        <div class="field-row"><div class="field-name">Maker / Model</div><div>Manufacturer and engine designation (e.g., MAN B&W 6S60MC)</div></div>
-        <div class="field-row"><div class="field-name">MCR (kW)</div><div>Maximum Continuous Rating in kilowatts</div></div>
-        <div class="field-row"><div class="field-name">Rated RPM</div><div>RPM at MCR</div></div>
-        <div class="field-row"><div class="field-name">NCR (%)</div><div>Normal Continuous Rating — typically 85–90% of MCR</div></div>
-        <h3 class="guide-h3">D.G. Details</h3>
-        <div class="field-row"><div class="field-name">Rated kVA / kW</div><div>Generator nameplate output capacity</div></div>
-        <div class="field-row"><div class="field-name">Voltage / Frequency</div><div>Typically 440V / 60Hz for most vessels</div></div>
-        <div class="field-row"><div class="field-name">Power Factor</div><div>Typically 0.8 lagging</div></div>
-        <div class="field-row"><div class="field-name">No. of DGs</div><div>Number of generators aboard</div></div>
-        <h3 class="guide-h3">Module Status</h3>
-        <p>Each module card shows its current status. Click the module name or use the navbar to navigate to it. The dashboard progress tiles show overall completion.</p>
-      </div>
-
-      <!-- Commissioning -->
-      <div class="guide-section" id="commissioning">
-        <h2 class="guide-h">Commissioning Test</h2>
-        <p>Covers all pre-start safety checks, device trip tests, alarm verification, cold/slow turning, and first fire. Complete this module before any load test.</p>
-        <h3 class="guide-h3">Pre-Start Checklist</h3>
-        <p>24 standard pre-start items covering lube oil, cooling water, fuel system, control air, starting air, and crankcase ventilation. For each item select Pass / Fail / N/A and add a remark if needed.</p>
-        <h3 class="guide-h3">Safety Device Trips</h3>
-        <p>10 critical safety systems (LO low pressure, overspeed, cooling water HH, crankcase pressure, etc.). Enter the set point and actual recorded trip value. The result is automatically assessed against class tolerances.</p>
-        <h3 class="guide-h3">Alarm Checklist</h3>
-        <p>15 alarm points. Verify each alarm operates at its set point. Select Pass / Fail / N/A per alarm.</p>
-        <h3 class="guide-h3">Cold / Slow Turning</h3>
-        <p>Record the number of turns on air alone before first fire, crankcase condition, and any abnormalities observed.</p>
-        <h3 class="guide-h3">First Fire Record</h3>
-        <div class="field-row"><div class="field-name">Start Method</div><div>Air start / Hydraulic / Electric</div></div>
-        <div class="field-row"><div class="field-name">Air Pressure</div><div>Starting air pressure (bar)</div></div>
-        <div class="field-row"><div class="field-name">Initial LO Press</div><div>Pre-lube pressure before start (bar)</div></div>
-        <div class="field-row"><div class="field-name">Idle Duration</div><div>Time held at idle / slow RPM (min)</div></div>
-        <div class="field-row"><div class="field-name">Exhaust Colour</div><div>Visual observation — clear, light grey, black</div></div>
-        <h3 class="guide-h3">Excel Export</h3>
-        <p>Exports 3 sheets: Pre-Start Checks, Safety Device Trips, and Alarm Tests. All pass/fail results and remarks are included.</p>
-      </div>
-
-      <!-- DG Test -->
-      <div class="guide-section" id="dgtest">
-        <h2 class="guide-h">D.G. Load Test</h2>
-        <p>Step load test for diesel generators per class rules. Tests from 0% to 110% load with voltage and frequency regulation calculations.</p>
-        <h3 class="guide-h3">Generator Nameplate</h3>
-        <p>Enter rated kVA, kW, voltage, frequency, power factor, and RPM from the generator nameplate. These are used as reference values for regulation calculations.</p>
-        <h3 class="guide-h3">Step Load Table</h3>
-        <p>Six load steps: 0% / 25% / 50% / 75% / 100% / 110% of rated kW. For each step record:</p>
-        <div class="field-row"><div class="field-name">kW Applied</div><div>Actual load applied (auto-calculates target kW from step %)</div></div>
-        <div class="field-row"><div class="field-name">kVA</div><div>Auto-calculated: kW ÷ power factor</div></div>
-        <div class="field-row"><div class="field-name">Voltage (V)</div><div>Terminal voltage measured under load</div></div>
-        <div class="field-row"><div class="field-name">Frequency (Hz)</div><div>Frequency measured under load</div></div>
-        <div class="field-row"><div class="field-name">Power Factor</div><div>Measured PF at this load step</div></div>
-        <div class="field-row"><div class="field-name">RPM</div><div>Engine speed under load</div></div>
-        <div class="field-row"><div class="field-name">Exhaust Temp (°C)</div><div>Average exhaust manifold temperature</div></div>
-        <h3 class="guide-h3">Regulation Calculations</h3>
-        <p>The app automatically calculates:</p>
-        <div class="tip">
-          <strong>Voltage Regulation %</strong> = (V_no-load − V_full-load) / V_full-load × 100<br/>
-          <strong>Frequency Regulation %</strong> = (Hz_no-load − Hz_full-load) / Hz_full-load × 100<br/>
-          Class limit: both must be <strong>≤ ±5%</strong>
-        </div>
-        <p>A Pass/Fail badge is shown based on class rules. If VR or FR exceeds 5%, the badge turns red.</p>
-        <h3 class="guide-h3">Parallel Operation</h3>
-        <p>8-item checklist for generator paralleling tests: synchroniser operation, load sharing, bus bar protection, preferential trip sequence, etc.</p>
-        <h3 class="guide-h3">Additional Tests</h3>
-        <p>12-item checklist covering insulation resistance, earth fault detection, sequential starting, AVR performance, and governor response.</p>
-        <h3 class="guide-h3">Load Chart</h3>
-        <p>Dual-axis chart showing kW bars vs voltage line and frequency line across load steps. Useful for identifying voltage droop or frequency instability.</p>
-      </div>
-
-      <!-- Sea Trial -->
-      <div class="guide-section" id="seatrial">
-        <h2 class="guide-h">Sea Trial</h2>
-        <p>Full performance sea trial covering speed runs, progressive speed table, crash stop, maneuvering, and fuel consumption measurement.</p>
-        <h3 class="guide-h3">Trial Conditions</h3>
-        <p>Record environmental conditions at the start of trial. These are mandatory for class approval:</p>
-        <div class="field-row"><div class="field-name">Displacement (t)</div><div>Trial displacement in metric tonnes</div></div>
-        <div class="field-row"><div class="field-name">Mean Draught (m)</div><div>Average of fore and aft draught</div></div>
-        <div class="field-row"><div class="field-name">Trim (m)</div><div>Fore/aft draught difference</div></div>
-        <div class="field-row"><div class="field-name">Water Depth (m)</div><div>Depth at trial location — must be >6× draught for valid results</div></div>
-        <div class="field-row"><div class="field-name">Wind Speed / Dir</div><div>Beaufort scale and compass direction</div></div>
-        <div class="field-row"><div class="field-name">Sea State</div><div>Douglas scale 0–9</div></div>
-        <div class="field-row"><div class="field-name">Current</div><div>Speed and direction if known</div></div>
-        <h3 class="guide-h3">Speed Trial</h3>
-        <p>Minimum 4 runs (2 in each direction) to cancel current effect. Enter direction, time (mm:ss), and distance (nautical miles). Speed is auto-calculated. Mean speed is compared against contract speed with a pass/fail result.</p>
-        <div class="tip">💡 The IMO standard requires runs in reciprocal directions. Class societies typically accept the mean of paired runs as the corrected speed.</div>
-        <h3 class="guide-h3">Progressive Speed Table</h3>
-        <p>9 RPM steps from ~50% to 100% MCR. For each step record power, speed, fuel rate, T/C inlet/outlet temps, exhaust cylinder average, charge air temp, LO pressure/temp, and cooling water temp. SFOC (g/kWh) is auto-calculated from fuel and power entries.</p>
-        <div class="tip">
-          <strong>SFOC Calculation:</strong> fuel consumption (g/h) ÷ shaft power (kW)<br/>
-          Typical range: 165–195 g/kWh at NCR for modern two-stroke engines
-        </div>
-        <h3 class="guide-h3">Crash Stop</h3>
-        <p>Record initial speed, RPM, time from astern order to stopped, stopping distance, maximum astern RPM achieved, and maximum cylinder / exhaust temperatures during the stop.</p>
-        <h3 class="guide-h3">Maneuvering Checklist</h3>
-        <p>10 items including bow thruster operation, stern thruster, stabilisers, anchor windlass, mooring winches, and tug connection points.</p>
-        <h3 class="guide-h3">Fuel Consumption</h3>
-        <p>Enter trial duration (hours), total fuel consumed (metric tonnes), and average power. SFOC is auto-calculated and compared to maker's guarantee.</p>
-      </div>
-
-      <!-- Long Trial -->
-      <div class="guide-section" id="longtrial">
-        <h2 class="guide-h">Long Trial / Endurance Test</h2>
-        <p>Continuous endurance run at specified load. Class societies require 4–24 hours at NCR. The app logs repeated readings at set intervals and flags alarms automatically.</p>
-        <h3 class="guide-h3">Trial Setup</h3>
-        <div class="field-row"><div class="field-name">Duration</div><div>Select from 4 / 6 / 8 / 12 / 24 hours</div></div>
-        <div class="field-row"><div class="field-name">Reading Interval</div><div>30 or 60 minutes between log entries</div></div>
-        <div class="field-row"><div class="field-name">Target Load %</div><div>Usually NCR = 85–90% MCR</div></div>
-        <div class="field-row"><div class="field-name">Target RPM / Power</div><div>Calculated from MCR data on dashboard</div></div>
-        <div class="field-row"><div class="field-name">Alarm Limits</div><div>Set LO temp and exhaust temp limits. Rows exceeding these turn red.</div></div>
-        <h3 class="guide-h3">Recording Readings</h3>
-        <p>Fill in the Quick Entry panel and click <strong>Add Reading</strong>. The timestamp is auto-populated. Parameters logged per reading:</p>
-        <p>RPM · kW · Shaft RPM · Fuel rate (L/hr) · Exhaust avg (°C) · T/C in/out (°C) · Charge air temp (°C) · Scav air press (bar) · LO press (bar) · LO temp (°C) · FW temp (°C) · SW temp (°C) · Remarks</p>
-        <h3 class="guide-h3">Alarm Highlighting</h3>
-        <p>Any reading where LO temp exceeds the limit or exhaust temp exceeds the limit is highlighted in red in the table, and a toast alert is shown at the time of entry.</p>
-        <h3 class="guide-h3">Trend Chart</h3>
-        <p>Live multi-line chart updating as readings are added. Shows RPM, kW, exhaust temperature, and LO temperature on dual Y-axes. Useful for identifying gradual drift or sudden anomalies during the run.</p>
-        <h3 class="guide-h3">Summary Statistics</h3>
-        <p>Auto-calculated average, maximum, and minimum for RPM, kW, exhaust temp, and LO temp across all readings.</p>
-      </div>
-
-      <!-- Predictive -->
-      <div class="guide-section" id="predictive">
-        <h2 class="guide-h">Predictive Analysis</h2>
-        <p>Tracks running hours, maintenance schedules, performance trends, and estimates Remaining Useful Life (RUL) for the main engine.</p>
-        <h3 class="guide-h3">Running Hours Log</h3>
-        <p>Log each run period with start date/time and end date/time. Running hours are auto-calculated. Cumulative total is shown and used for all maintenance schedule calculations.</p>
-        <h3 class="guide-h3">Maintenance Schedule</h3>
-        <p>9 pre-configured maintenance tiers:</p>
-        <div style="font-size:13px">
-          <div class="field-row"><div class="field-name">Daily (24 h)</div><div>Oil level checks, bilge, filters, rotating equipment rounds</div></div>
-          <div class="field-row"><div class="field-name">Weekly (168 h)</div><div>Purifier service, fuel oil tests, alarms check</div></div>
-          <div class="field-row"><div class="field-name">250 h</div><div>Fuel injector inspection, valve clearance (4-stroke)</div></div>
-          <div class="field-row"><div class="field-name">500 h</div><div>Governor oil, turbocharger bearing inspection</div></div>
-          <div class="field-row"><div class="field-name">1,000 h</div><div>Cylinder liner wear measurement, piston ring inspection</div></div>
-          <div class="field-row"><div class="field-name">2,500 h</div><div>Piston overhaul (2-stroke), fuel pump calibration</div></div>
-          <div class="field-row"><div class="field-name">5,000 h</div><div>T/C major overhaul, main bearing inspection</div></div>
-          <div class="field-row"><div class="field-name">Annual (8,760 h)</div><div>Class survey items, safety valve testing</div></div>
-          <div class="field-row"><div class="field-name">Dry Dock (43,800 h)</div><div>5-year class renewal — shaft, propeller, sea chest</div></div>
-        </div>
-        <p style="margin-top:10px">Enter your vessel's average daily running hours to get estimated calendar due dates for each interval.</p>
-        <h3 class="guide-h3">Performance Trend Log</h3>
-        <p>Log periodic performance checks (date, hours, RPM, power, SFOC, exhaust temp, LO consumption, vibration level). Four Chart.js trend charts display historical patterns for SFOC, exhaust temperature, LO consumption, and vibration.</p>
-        <h3 class="guide-h3">RUL Estimator</h3>
-        <p>Remaining Useful Life is estimated as:</p>
-        <div class="tip">
-          <strong>Adjusted Life</strong> = Design Life × Condition Factor × Maintenance Factor<br/>
-          <strong>RUL</strong> = Adjusted Life − Hours Consumed<br/>
-          <strong>% Life Consumed</strong> = Hours Consumed / Adjusted Life × 100
-        </div>
-        <div class="field-row"><div class="field-name">Design Life (h)</div><div>Maker's rated design life — typically 100,000–150,000 h for a 2-stroke</div></div>
-        <div class="field-row"><div class="field-name">Condition Factor</div><div>0.5–1.0 based on wear measurement results (1.0 = like new)</div></div>
-        <div class="field-row"><div class="field-name">Maintenance Factor</div><div>0.5–1.0 based on maintenance history quality (1.0 = fully maintained)</div></div>
-        <h3 class="guide-h3">Upcoming Events</h3>
-        <p>Maintenance items where remaining hours are less than 15% of the interval are shown as forecast cards, making it easy to plan ahead for the next port call.</p>
-      </div>
-
-      <!-- Sign-off -->
-      <div class="guide-section" id="signoff">
-        <h2 class="guide-h">Surveyor Sign-off</h2>
-        <p>The final step in the commissioning workflow. The class surveyor selects the tests they witnessed, enters their details, draws a digital signature, and generates a class-ready signed PDF certificate.</p>
-        <h3 class="guide-h3">Selecting Tests</h3>
-        <p>Check the box next to each test the surveyor witnessed and is certifying. Each module shows its current completion status. Only modules marked Done or In Progress can be signed off.</p>
-        <h3 class="guide-h3">Surveyor Details</h3>
-        <div class="field-row"><div class="field-name">Surveyor Name</div><div>Full legal name as it appears on the certificate</div></div>
-        <div class="field-row"><div class="field-name">Class Society</div><div>IRS / Lloyd's / DNV / BV / ABS / NK / ClassNK</div></div>
-        <div class="field-row"><div class="field-name">Certificate No.</div><div>Surveyor's badge or certificate number</div></div>
-        <div class="field-row"><div class="field-name">Survey Date</div><div>Date of final sign-off</div></div>
-        <div class="field-row"><div class="field-name">Survey Location</div><div>Port or shipyard where tests were conducted</div></div>
-        <div class="field-row"><div class="field-name">Overall Remarks</div><div>Any outstanding conditions, observations, or deferred items</div></div>
-        <h3 class="guide-h3">Digital Signature</h3>
-        <p>Draw your signature directly on the signature pad using a mouse or stylus. On a tablet, use your finger or stylus. The signature is captured as an image and embedded in the PDF.</p>
-        <div class="tip">💡 Click <strong>Save Signature</strong> after drawing to ensure your signature is stored locally. It will be restored if you navigate away and return.</div>
-        <h3 class="guide-h3">Witness Signature</h3>
-        <p>The owner's representative or chief engineer may also sign in the witness panel. Enter their name and designation in the witness details section.</p>
-        <h3 class="guide-h3">Generate Signed PDF</h3>
-        <p>Click <strong>Generate Signed PDF</strong> to produce a class-ready certificate containing:</p>
-        <ul style="margin:8px 0 0 18px;font-size:13px;line-height:1.8">
-          <li>Vessel particulars from the Dashboard</li>
-          <li>List of all certified tests with check marks</li>
-          <li>Surveyor details, date, and location</li>
-          <li>Digital signature image</li>
-          <li>Witness details and signature</li>
-          <li>Overall remarks</li>
+        <h2>Dashboard</h2>
+        <p>The Dashboard is the home page of EnginePulse. It provides:</p>
+        <ul>
+          <li><strong>Project Setup</strong> &mdash; vessel, engine, D.G., and surveyor details shared across all modules</li>
+          <li><strong>Test Modules</strong> &mdash; clickable cards showing each module and its completion status</li>
+          <li><strong>Progress Overview</strong> &mdash; tiles showing totals for Completed, Signed Off, and In Progress modules</li>
+          <li><strong>Data Backup &amp; Restore</strong> &mdash; export all data as JSON or import a previous backup</li>
         </ul>
-        <h3 class="guide-h3">Finalise & Lock</h3>
-        <p>Click <strong>Finalise & Lock</strong> to set all signed modules to status "Signed" on the dashboard. This confirms the sign-off is complete. You can unlock using the Unlock button if corrections are needed before the PDF is submitted.</p>
-        <div class="warn">⚠️ Once you submit the PDF to the class society, keep a copy saved locally. Clearing browser data will remove all stored data.</div>
+        <p>Changes to Project Setup are saved automatically on every input. The vessel strip (name, IMO, class, engine) appears at the top of every other page once saved.</p>
       </div>
 
-      <!-- Export -->
-      <div class="guide-section" id="export">
-        <h2 class="guide-h">Export Options</h2>
-        <h3 class="guide-h3">Excel Export (per module)</h3>
-        <p>Each module has an <strong>Export Excel</strong> button that downloads an .xlsx file via SheetJS. Worksheets are structured with headers and formatted data ready for submission to class or owner.</p>
-        <h3 class="guide-h3">Print</h3>
-        <p>Every module has a print button. The print stylesheet hides the navbar, sidebar, and non-print elements, producing a clean hardcopy of the current module's data.</p>
-        <h3 class="guide-h3">Signed PDF (Sign-off module)</h3>
-        <p>Generated from the Sign-off page using jsPDF. Contains vessel particulars, certified test list, surveyor details, and embedded digital signature. Suitable for submission to class society as a supporting document.</p>
-        <div class="tip">💡 For official class records, the Excel export serves as the raw data attachment and the signed PDF serves as the cover certificate.</div>
+      <div class="guide-section" id="commissioning">
+        <h2>Commissioning Test</h2>
+        <p>Records the full commissioning sequence: pre-start inspection, safety device trips, alarm tests, cold turning, first fire, no-load parameters, fuel changeover, and overall result.</p>
+
+        <h3>A. Pre-Start Checks</h3>
+        <p>24-item checklist covering lube oil, cooling water, fuel system, starting air, turbocharger, alignment, instrumentation, and fire detection. Mark each item OK / Fail / N/A.</p>
+
+        <h3>B. Safety Device Trip Tests</h3>
+        <p>Table of 10 safety devices (overspeed mechanical/electronic, low LO pressure, high jacket water temp, high exhaust temp, crankcase pressure, alarms, emergency stops). Enter the set point, recorded trip value, and unit for each.</p>
+
+        <h3>C. Alarm &amp; Shutdown Tests</h3>
+        <p>15-item checklist covering individual alarm and shutdown functions including auto-start on blackout and preferential trip for generators.</p>
+
+        <h3>D. Cold Turning / Slow Turning Record</h3>
+        <p>Turning gear type, indicator cock status, duration, and observations. Confirms no water in cylinders and no unusual resistance before initial start.</p>
+
+        <h3>E. First Fire / Initial Start Record</h3>
+        <p>Date, time, start method, air pressure, initial LO pressure, initial RPM, idle run duration, and exhaust colour at start.</p>
+
+        <h3>F. No-Load Running Parameters</h3>
+        <p>RPM, LO pressure, LO temperature, coolant temp, fuel pressure, charge air pressure, exhaust temperature average, and vibration under no-load.</p>
+
+        <h3 id="fuel-changeover">G. Fuel Changeover Test (HFO &harr; MDO)</h3>
+        <p>Tests smooth changeover between HFO (residual) and MDO (distillate) fuels under load. Record:</p>
+        <ul>
+          <li>Test date/time, engine load (%), and changeover direction</li>
+          <li>Changeover duration (minutes)</li>
+          <li>HFO and MDO temperatures and viscosity (cSt) at the moment of changeover</li>
+          <li>Engine RPM before and after &mdash; sudden RPM dip or hunting is a warning sign</li>
+          <li>Exhaust temperature before and after</li>
+          <li>Fuel pressure during changeover</li>
+          <li>Any alarms activated (Low fuel pressure, High exhaust temp, etc.)</li>
+          <li>Overall result: PASS / MINOR ISSUE / FAIL</li>
+        </ul>
+        <p>A smooth changeover with no RPM deviation and no alarms is a PASS. Remarks should describe any RPM drop, hunting, exhaust colour change, or alarm activations.</p>
+        <div class="tip">Changeover is typically performed at 50&ndash;75% MCR. Operate fuel changeover valves slowly and match fuel viscosity as closely as possible before switching.</div>
+
+        <h3>H. Overall Commissioning Result</h3>
+        <p>Final overall verdict (Satisfactory / Unsatisfactory) and completion date/time. Add punch list items or deficiencies in the final remarks box.</p>
+
+        <h3>Export</h3>
+        <p>Click <strong>Export Excel</strong> to download a 4-sheet workbook: Pre-Start Checks, Safety Device Trips, Alarm Tests, and Fuel Changeover.</p>
       </div>
 
-      <!-- Tips -->
+      <div class="guide-section" id="dgtest">
+        <h2>D.G. Load Test</h2>
+        <p>Records step load tests, voltage/frequency regulation, parallel operations, governor test, and insulation resistance for each individual diesel generator set.</p>
+
+        <h3 id="dg-tabs">Per-DG Unit Tabs</h3>
+        <p>At the top of the page are tabs: <strong>DG No.1 / DG No.2 / DG No.3</strong>. Each tab stores data independently in separate local storage keys. Switch between tabs to enter test data for each generator. The current unit label appears in each section title.</p>
+        <div class="tip">Switching tabs automatically saves the current unit&rsquo;s data and loads the selected unit&rsquo;s previously saved data.</div>
+
+        <h3>A. Generator Particulars</h3>
+        <p>Maker, model, serial number, kVA rating, kW, rated voltage, Hz, power factor, and insulation class for the current DG unit.</p>
+
+        <h3>B. Step Load Test (0% to 110%)</h3>
+        <p>Records performance at each load step: 0%, 25%, 50%, 75%, 100%, 110% (overload). For each step enter kW load, voltage, frequency, voltage regulation (%), and frequency regulation (%). Typical class limits are VR &le; &plusmn;5% and FR &le; &plusmn;5%. The VR and FR columns show <span class="badge-inline b-pass">PASS</span> or <span class="badge-inline b-fail">FAIL</span> automatically.</p>
+
+        <h3>C. Parallel Operation</h3>
+        <p>Records synchronisation checks, load sharing, and parallel running observations for multi-generator vessels.</p>
+
+        <h3 id="dg-governor">D. Governor / Load Acceptance Test</h3>
+        <p>Tests governor response by applying and removing load suddenly:</p>
+        <ul>
+          <li><strong>Throw-off test:</strong> Remove full load suddenly &mdash; measure frequency overshoot and recovery time to rated speed</li>
+          <li><strong>Throw-on test:</strong> Apply full load suddenly &mdash; measure frequency undershoot and recovery time</li>
+          <li><strong>Recovery time limit: &le; 5 seconds</strong> &mdash; badge shows <span class="badge-inline b-pass">PASS</span> or <span class="badge-inline b-fail">FAIL</span> automatically</li>
+        </ul>
+
+        <h3 id="dg-megger">E. Insulation Resistance (Megger Test)</h3>
+        <p>Records megger readings for four points: Phase U, Phase V, Phase W, and Neutral to Earth. Minimum acceptable value is 1 M&Omega;. Each row shows <span class="badge-inline b-pass">PASS</span> or <span class="badge-inline b-fail">FAIL</span> automatically.</p>
+        <div class="warn">Always isolate the generator from the bus and discharge capacitors before taking megger readings. Never megger energised equipment.</div>
+
+        <h3>F. Overall Result</h3>
+        <p>Overall verdict for the current DG unit. Add outstanding items in remarks.</p>
+      </div>
+
+      <div class="guide-section" id="emergencygen">
+        <h2>Emergency Generator Test</h2>
+        <p>Tests the emergency diesel generator per SOLAS II-1/42. The emergency generator must start automatically on blackout and supply power to essential services within 45 seconds.</p>
+
+        <h3>A. Generator Particulars</h3>
+        <p>Maker, model, serial number, kVA, kW, rated voltage, and Hz.</p>
+
+        <h3>B. Pre-Start Checklist</h3>
+        <p>12-item checklist: fuel level, battery charge, starter, cooling water, lube oil, exhaust clear, governor oil, battery charger, hand crank availability, and transfer switch.</p>
+
+        <h3 id="eg-solas">C. Auto-Start Blackout Test (SOLAS)</h3>
+        <p>Simulate a main board blackout and measure time from blackout to power supply on the emergency switchboard.</p>
+        <ul>
+          <li>Enter auto-start time (seconds)</li>
+          <li><span class="badge-inline b-solas">SOLAS limit: &le; 45 sec</span> &mdash; badge shows PASS/FAIL automatically</li>
+          <li>Record number of start attempts, voltage, and Hz after start</li>
+        </ul>
+        <div class="tip">SOLAS requires the emergency generator to start without any manual intervention. The clock starts from the moment the main bus goes dead.</div>
+
+        <h3>D. Step Load Test (0% to 110%)</h3>
+        <p>Same format as the main D.G. step load test with voltage, frequency, and RPM at each load step.</p>
+
+        <h3>E. Governor / Load Acceptance Test</h3>
+        <p>Throw-off and throw-on tests. Recovery &le; 5 sec = PASS.</p>
+
+        <h3>F. Safety Device Trips</h3>
+        <p>9 safety devices: overspeed, low LO pressure shutdown, high jacket water temp, high exhaust temp, crankcase pressure, low LO alarm, high LO temp alarm, local emergency stop, and remote emergency stop.</p>
+
+        <h3>G. Insulation Resistance (Megger)</h3>
+        <p>Four megger points (U/V/W/Neutral to Earth) with 1 M&Omega; minimum. Auto pass/fail badges.</p>
+
+        <h3>H. Auxiliary Tests</h3>
+        <p>8-item checklist: fuel tank auto-fill, battery charger, transfer switch (both directions), shore connection interlock, emergency lighting, bilge pump supply, navigation light supply, and fire pump supply.</p>
+
+        <h3>I. Overall Result</h3>
+        <p>Overall verdict plus completion date and outstanding items.</p>
+
+        <h3>Export</h3>
+        <p>3-sheet Excel workbook: Pre-Start, Blackout Test, Load Test.</p>
+      </div>
+
+      <div class="guide-section" id="switchboard">
+        <h2>Main Switchboard Test</h2>
+        <p>Records all switchboard acceptance tests: bus-tie, dead bus energisation, preferential trip, shore connection, and protection relay tests.</p>
+
+        <h3>A. Switchboard Particulars</h3>
+        <p>Maker, model, rated voltage, rated current, short circuit rating (kA), generator panels, bus-tie breaker type, and shore connection details.</p>
+
+        <h3>B. Bus-Tie / Sectionalising Test</h3>
+        <p>Confirms bus-tie breaker closes with correct phase sequence (R-Y-B), acceptable phase angle difference (&le;10&deg;), and no trips on close.</p>
+
+        <h3>C. Dead Bus Energisation Test</h3>
+        <p>Records which generator energises the dead bus, time to energise, voltage, and Hz achieved. Confirms the board can be brought alive from zero.</p>
+
+        <h3>D. Preferential Trip / Load Shedding Test</h3>
+        <p>Verifies automatic shedding of non-essential loads to prevent total blackout on generator overload. 6 pre-populated load groups with priority levels and set points (110&ndash;120% load). Mark Pass/Fail/N/A for each group.</p>
+        <div class="tip">Preferential trip protects against total blackout by shedding non-essential consumers (HVAC, galley, cargo equipment) before generators trip on overload.</div>
+
+        <h3>E. Shore Connection / Power Changeover Test</h3>
+        <p>Shore supply voltage, Hz, cable rating, changeover times in both directions, and interlock verification (prevents simultaneous shore and generator breakers).</p>
+
+        <h3>F. Protection Relay &amp; MCCB Tests</h3>
+        <p>9 devices: generator overcurrent (IDMT), generator earth fault, reverse power relay, under voltage, over voltage, under frequency, bus-tie interlocking, main bus bar MCCB, and feeder MCCBs. Enter set point and recorded trip value for each.</p>
+
+        <h3>G. General Switchboard Checklist</h3>
+        <p>11-item checklist: panel doors, busbar condition, instrument calibration, synchroscope test, auto-synchroniser, running hours meters, power factor meter, labelling, busbar IR, emergency stops, and UPS for navigation/comms.</p>
+
+        <h3>H. Overall Result</h3>
+        <p>Overall verdict: PASS / CONDITIONAL PASS / FAIL. Record any outstanding items.</p>
+
+        <h3>Export</h3>
+        <p>2-sheet Excel workbook: Protection Relays and Preferential Trip results.</p>
+      </div>
+
+      <div class="guide-section" id="seatrial">
+        <h2>Sea Trial</h2>
+        <p>Records the full sea trial programme: speed trial, crash stop, maneuvering, fuel consumption, individual cylinder exhaust temperatures, steering gear test, vibration measurement, and overall result.</p>
+
+        <h3>A. Trial Conditions</h3>
+        <p>Date, displacement, sea state (Beaufort), wind force, water depth, current, and initial bunker figures.</p>
+
+        <h3>B. Speed Trial</h3>
+        <p>Speed runs at various RPM settings, typically in two directions to eliminate current and wind effects. Enter RPM, shaft power (kW), speed (knots), and slip (%) for each run.</p>
+
+        <h3>C. Crash Stop Test</h3>
+        <p>Full-ahead to full-astern emergency stop: initial speed, time from order to full astern, crash stop distance (m), and final speed.</p>
+
+        <h3>D. Maneuvering Test</h3>
+        <p>Engine response to all telegraph orders from Full Ahead through to Full Astern. Enter time and RPM for each step.</p>
+
+        <h3 id="cyl-temps">E. Individual Cylinder Exhaust Temperatures</h3>
+        <p>Select the number of cylinders (4&ndash;12) from the dropdown. The table builds dynamically with columns for 25%, 50%, 75%, and 100% MCR load steps.</p>
+        <p>The app calculates the mean temperature and maximum deviation at each load. A maker&rsquo;s limit input (default 30&deg;C) controls the balance result badge: <span class="badge-inline b-pass">BALANCED</span> or <span class="badge-inline b-fail">UNBALANCED</span>.</p>
+        <div class="warn">A cylinder running significantly hot or cold indicates injector issues, valve timing problems, or liner wear. Investigate any cylinder deviating beyond the maker&rsquo;s limit.</div>
+
+        <h3 id="steering">F. Steering Gear Test</h3>
+        <p>Tests per SOLAS V/26:</p>
+        <ul>
+          <li><strong>Hard-over time:</strong> rudder from 35&deg; one side to 30&deg; other side at maximum speed. <span class="badge-inline b-solas">SOLAS limit: &le; 28 sec</span> &mdash; badge shows PASS/FAIL automatically</li>
+          <li>Emergency steering changeover and operation from the steering gear room</li>
+          <li>Pump unit 1 solo operation and pump unit 2 solo operation</li>
+        </ul>
+
+        <h3 id="vibration">G. Vibration Measurement (ISO 6954)</h3>
+        <p>Records vibration at 6 locations. Enter Vertical, Transverse, and Longitudinal readings (mm/s) at 100% MCR for each location. The app compares the maximum reading against the ISO 6954 limit for the area type:</p>
+        <ul>
+          <li>Crew accommodation spaces: &le; 4 mm/s &rarr; <span class="badge-inline b-pass">PASS</span> / <span class="badge-inline b-fail">FAIL</span></li>
+          <li>Working areas (engine room, cargo): &le; 6 mm/s &rarr; <span class="badge-inline b-pass">PASS</span> / <span class="badge-inline b-fail">FAIL</span></li>
+        </ul>
+
+        <h3>H. Maneuvering Records</h3>
+        <p>Systematic records of all telegraph movements and engine responses during the full trial programme.</p>
+
+        <h3>I. Fuel Consumption / SFOC</h3>
+        <p>Initial ROB, consumption, final ROB, and calculated SFOC (g/kWh). The maker&rsquo;s specified SFOC column is highlighted in amber for comparison.</p>
+
+        <h3>J. Overall Result</h3>
+        <p>Overall verdict, completion date, and remarks including any outstanding items.</p>
+      </div>
+
+      <div class="guide-section" id="longtrial">
+        <h2>Long Trial / Endurance</h2>
+        <p>Records engine performance during sustained operation at rated or near-rated power. Typical durations are 4, 8, or 12 hours per class or contract requirements.</p>
+        <h3>Periodic Readings</h3>
+        <p>Enter readings at each time interval (typically every 30 or 60 minutes): RPM, power (kW), LO pressure, LO temperature, jacket water temperature, exhaust temperatures, charge air pressure, and fuel consumption rate.</p>
+        <h3>Trend Chart</h3>
+        <p>A live chart plots key parameters over time as you enter readings. Trends in temperature rise or pressure drop can indicate developing problems during the trial.</p>
+        <h3>Overall Result</h3>
+        <p>Enter overall verdict after completing the required endurance period.</p>
+      </div>
+
+      <div class="guide-section" id="predictive">
+        <h2>Predictive Analysis</h2>
+        <p>Tracks running hours, maintenance due dates, and performance trends to estimate remaining useful life and flag upcoming service intervals.</p>
+        <h3>Running Hours &amp; Maintenance Schedule</h3>
+        <p>Enter current running hours and last service hours for each major component (top overhaul, full overhaul, injectors, turbocharger, fuel pump, bearings). Hours remaining to next service is calculated for each item.</p>
+        <h3>Performance Trends</h3>
+        <p>Compares current parameters against baseline (commissioning) values. Deviations beyond set limits flag the parameter as a warning.</p>
+        <h3>RUL Estimator</h3>
+        <p>Estimates remaining useful life before major overhaul based on running hours and trend data. Use as a guide only &mdash; always follow maker&rsquo;s recommendations and class survey requirements.</p>
+      </div>
+
+      <div class="guide-section" id="signoff">
+        <h2>Surveyor Sign-off</h2>
+        <p>Produces the final signed certificate or combined full trial report for submission to class and owner.</p>
+
+        <h3>A. Tests Being Signed Off</h3>
+        <p>Check the box next to each test module being certified. All 7 modules are listed: Commissioning, D.G. Load Test, Emergency Generator, Main Switchboard, Sea Trial, Long Trial, and Predictive Analysis. Current module status appears next to each.</p>
+
+        <h3>B. Surveyor Details</h3>
+        <p>Name, class society, certificate/badge number, survey date, and survey location.</p>
+
+        <h3>C. Witness / Owner&rsquo;s Representative</h3>
+        <p>Name, designation, and company of the witness (typically the Chief Engineer or owner&rsquo;s superintendent).</p>
+
+        <h3>D. Surveyor&rsquo;s Digital Signature</h3>
+        <p>Draw your signature directly on the canvas using mouse or stylus. Click <strong>Save Signature</strong> to persist it &mdash; it will be embedded in all generated PDFs. Click <strong>Clear Signature</strong> to start again.</p>
+
+        <h3>E. Witness Signature</h3>
+        <p>Witness draws their signature on the second canvas.</p>
+
+        <h3>F. Sign-off Summary Preview</h3>
+        <p>Live preview of the certificate updating as you type, showing vessel details, certified tests, remarks, and signature blocks.</p>
+
+        <h3>Generate Signed PDF</h3>
+        <p>Single-page PDF certificate with vessel details, list of certified tests, remarks, and embedded surveyor signature. Saved as <span class="kbd">SignedCertificate_VesselName_Date.pdf</span>.</p>
+
+        <h3 id="combined-pdf">Combined Full Trial Report PDF</h3>
+        <p>Comprehensive multi-page report covering all modules:</p>
+        <ul>
+          <li>Title page with vessel and surveyor details</li>
+          <li>Module status summary table showing which tests are certified</li>
+          <li>Key data extracted from each completed module: Commissioning (fuel changeover, overall), D.G. Test (per-unit load and regulation), Emergency Gen (auto-start SOLAS result), Switchboard (overall), Sea Trial (crash stop, steering SOLAS result), and Long Trial</li>
+          <li>Surveyor remarks and signature blocks with embedded signature image</li>
+        </ul>
+        <p>Saved as <span class="kbd">FullTrialReport_VesselName_Date.pdf</span>. Submit this document to the class society for survey acceptance.</p>
+
+        <h3>Finalise &amp; Lock</h3>
+        <p>Marks all selected modules as &ldquo;Signed&rdquo; (shown in teal on Dashboard) and locks the sign-off page. An unlock button appears if you need to make changes.</p>
+      </div>
+
+      <div class="guide-section" id="backup">
+        <h2>Data Backup &amp; Restore</h2>
+        <p>All EnginePulse data lives in your browser&rsquo;s local storage. It persists across sessions in the same browser but can be lost if you clear browser data, switch browsers, or change devices.</p>
+
+        <h3>Exporting a Backup</h3>
+        <p>On the Dashboard, click <strong>Export All Data (JSON)</strong>. A file named <span class="kbd">EnginePulse_VesselName_YYYY-MM-DD.json</span> is downloaded containing all your test data.</p>
+
+        <h3>Restoring from Backup</h3>
+        <p>On the Dashboard, click <strong>Import Backup (JSON)</strong>. Select the previously exported file. EnginePulse restores all data and reloads the page.</p>
+        <div class="warn">Importing overwrites all existing data in your browser. Always export a current backup before importing an old one.</div>
+
+        <h3>Transferring to Another Device</h3>
+        <p>Export JSON on device A &rarr; copy file to device B &rarr; open EnginePulse on device B &rarr; import the JSON. All test data transfers instantly.</p>
+
+        <h3>Sharing with Another Inspector</h3>
+        <p>Export JSON &rarr; send by email or USB &rarr; recipient imports on their browser. Both parties have the same project data.</p>
+      </div>
+
       <div class="guide-section" id="tips">
-        <h2 class="guide-h">Tips & Offline Use</h2>
-        <h3 class="guide-h3">Using Offline</h3>
-        <p>Open EnginePulse while connected to the internet. Once loaded, all functionality works without a connection — no API calls are made. You can close and reopen the tab and all your data remains intact.</p>
-        <h3 class="guide-h3">Multiple Vessels</h3>
-        <p>EnginePulse currently supports one active project per browser. To work on a second vessel, use a different browser profile or clear the data and start fresh after exporting.</p>
-        <h3 class="guide-h3">Tablet / Stylus</h3>
-        <p>The signature pad works with capacitive touchscreen styluses and S-Pen on Android tablets. For the best result, rest your palm on the screen only after beginning the stroke — the pad tracks the first contact point as the pen tip.</p>
-        <h3 class="guide-h3">Keyboard Shortcuts</h3>
-        <div class="field-row"><div class="field-name"><kbd class="kbd">Tab</kbd></div><div>Move between form fields</div></div>
-        <div class="field-row"><div class="field-name"><kbd class="kbd">Ctrl + P</kbd></div><div>Print current module</div></div>
-        <div class="field-row"><div class="field-name"><kbd class="kbd">Ctrl + S</kbd></div><div>Most modules auto-save; no manual save needed</div></div>
-        <h3 class="guide-h3">Backup Your Data</h3>
-        <p>Export your Excel files regularly, especially before long trial and after sea trial. The Sign-off PDF should be downloaded immediately after generation. Browser updates and clearing site data will erase localStorage.</p>
-        <div class="tip">💡 <strong>Recommended workflow:</strong> Export Excel from each module after completion, then generate the signed PDF at the end. Keep both in the vessel's electronic record system.</div>
-        <h3 class="guide-h3">Contact / Support</h3>
-        <p>EnginePulse is built and maintained by <strong>Suji Kumar C</strong>. For feedback or issues, visit <a href="https://sujikumar.com" style="color:var(--teal-br)" target="_blank">sujikumar.com</a>.</p>
+        <h2>Tips &amp; Offline Use</h2>
+        <h3>Offline Operation</h3>
+        <p>EnginePulse loads scripts from CDN on first open. Once loaded, it works fully offline in the same browser tab. For guaranteed offline use, open EnginePulse while connected, then keep the tab open.</p>
+        <h3>Auto-Save</h3>
+        <p>All form inputs auto-save to local storage on every change. You never need to click Save manually (though Save buttons exist for peace of mind). Data is preserved if you accidentally close the tab.</p>
+        <h3>Dark / Light Mode</h3>
+        <p>Click the sun/moon icon in the top-right navigation bar to toggle between dark and light mode. Your preference is saved across all pages.</p>
+        <h3>Printing</h3>
+        <p>Every page has a <strong>Print</strong> button. Button rows and navigation are hidden in print view. For a professional record, use <strong>Generate PDF</strong> instead.</p>
+        <h3>Multiple Vessels</h3>
+        <p>EnginePulse is single-project. For a second vessel, export your current data as JSON, then clear the project and start fresh. Import the JSON to restore the first vessel later.</p>
+        <h3>Class Society Limits</h3>
+        <p>Hard-coded limits in EnginePulse (VR &le; &plusmn;5%, FR &le; &plusmn;5%, governor recovery &le; 5 sec, SOLAS auto-start &le; 45 sec, steering &le; 28 sec, ISO 6954 vibration) are based on typical class requirements. Always verify against your specific class society&rsquo;s rules and the maker&rsquo;s instruction manual. Final acceptance authority rests with the attending surveyor.</p>
       </div>
 
     </div><!-- /content -->
   </div><!-- /guide-layout -->
 </div>
-<footer>Built by <strong>Suji Kumar C</strong> &nbsp;·&nbsp; EnginePulse &nbsp;·&nbsp; <a href="index.html">Dashboard</a></footer>
+<footer>Built by <strong>Suji Kumar C</strong> &nbsp;&middot;&nbsp; EnginePulse &nbsp;&middot;&nbsp; <a href="index.html">Dashboard</a></footer>
 <script src="js/common.js"></script>
-<script>buildNavbar('guide');</script>
+<script>
+buildNavbar('guide');
+// Highlight active TOC link on scroll
+const sections = document.querySelectorAll('.guide-section');
+const tocLinks  = document.querySelectorAll('.guide-toc a');
+const observer  = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(l => { l.style.color = ''; });
+      const active = document.querySelector(`.guide-toc a[href="#${e.target.id}"]`);
+      if (active) active.style.color = 'var(--teal-br)';
+    }
+  });
+}, { rootMargin:'-60px 0px -80% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
 </body>
 </html>

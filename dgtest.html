@@ -24,9 +24,20 @@
   </div>
   <div id="vessel-strip"></div>
 
+  <!-- Per-DG selector tabs -->
+  <div class="section" style="margin-bottom:0">
+    <div class="section-title">Select Generator Unit</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px" id="dg-tabs">
+      <button class="btn btn-primary dg-tab" data-unit="dg1" onclick="switchDG('dg1')">DG No.1</button>
+      <button class="btn btn-outline dg-tab" data-unit="dg2" onclick="switchDG('dg2')">DG No.2</button>
+      <button class="btn btn-outline dg-tab" data-unit="dg3" onclick="switchDG('dg3')">DG No.3</button>
+    </div>
+    <div class="callout" style="margin-bottom:0">Each DG unit stores data separately. Switch tabs to record tests for each generator independently.</div>
+  </div>
+
   <!-- D.G. Details -->
   <div class="section">
-    <div class="section-title">Generator Details</div>
+    <div class="section-title">Generator Details <span id="dg-unit-label" style="color:var(--teal-br);font-size:13px">(DG No.1)</span></div>
     <div class="card">
       <div class="form-row col-4">
         <div class="form-group"><label>D.G. Set No.</label><select id="dg-set"><option>D.G. No.1</option><option>D.G. No.2</option><option>D.G. No.3</option><option>Emergency D.G.</option></select></div>
@@ -110,6 +121,67 @@
     <div class="section-title">Additional Tests</div>
     <div class="card">
       <div class="checklist" id="addl-list"></div>
+    </div>
+  </div>
+
+  <!-- Governor / Load Acceptance Test -->
+  <div class="section">
+    <div class="section-title">Governor / Load Acceptance Test</div>
+    <div class="callout">Sudden throw-off and throw-on test. Verifies governor stability, AVR recovery, and that V/Hz stay within class limits (±10%, recovery ≤ 5 sec).</div>
+    <div class="card">
+      <form id="gov-form">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Pre-Test Load (kW)</label><input type="number" name="govPreLoad" placeholder="kW"/></div>
+          <div class="form-group"><label>Pre-Test Voltage (V)</label><input type="number" name="govPreV" placeholder="V"/></div>
+          <div class="form-group"><label>Pre-Test Hz</label><input type="number" name="govPreHz" placeholder="Hz" step="0.1"/></div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--teal-br);margin:8px 0 4px">Throw-Off (Full Load → No Load)</div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>Throw-off kW</label><input type="number" name="govThrowOffKw" placeholder="kW dropped"/></div>
+          <div class="form-group"><label>Max Voltage rise (V)</label><input type="number" name="govMaxV" placeholder="V peak"/></div>
+          <div class="form-group"><label>Max Hz rise</label><input type="number" name="govMaxHz" placeholder="Hz peak" step="0.1"/></div>
+          <div class="form-group"><label>Recovery Time (sec)</label><input type="number" name="govOffRecTime" placeholder="sec" step="0.1" id="gov-off-rec"/></div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--teal-br);margin:8px 0 4px">Throw-On (No Load → Full Load)</div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>Throw-on kW</label><input type="number" name="govThrowOnKw" placeholder="kW added"/></div>
+          <div class="form-group"><label>Min Voltage dip (V)</label><input type="number" name="govMinV" placeholder="V min"/></div>
+          <div class="form-group"><label>Min Hz dip</label><input type="number" name="govMinHz" placeholder="Hz min" step="0.1"/></div>
+          <div class="form-group"><label>Recovery Time (sec)</label><input type="number" name="govOnRecTime" placeholder="sec" step="0.1" id="gov-on-rec"/></div>
+        </div>
+        <div class="form-row col-3" style="margin-top:8px">
+          <div class="form-group"><label>Throw-off Result</label><div id="gov-off-badge">—</div></div>
+          <div class="form-group"><label>Throw-on Result</label><div id="gov-on-badge">—</div></div>
+          <div class="form-group"><label>Governor Stability</label>
+            <select name="govStability" style="margin-top:6px"><option value="">—</option><option value="stable">Stable — no hunting</option><option value="minor">Minor hunting — settled</option><option value="unstable">Unstable — investigation needed</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Remarks</label><textarea name="govRemarks" placeholder="Governor response, AVR behaviour, any oscillation observed..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Insulation Resistance (Megger) -->
+  <div class="section">
+    <div class="section-title">Insulation Resistance Test (Megger)</div>
+    <div class="card">
+      <form id="meg-form">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Test Voltage (V)</label><input type="number" name="megVolt" placeholder="500 / 1000 V"/></div>
+          <div class="form-group"><label>Ambient Temp (°C)</label><input type="number" name="megTemp" placeholder="°C"/></div>
+          <div class="form-group"><label>Humidity (%)</label><input type="number" name="megHumidity" placeholder="%"/></div>
+        </div>
+        <table class="data-table" style="margin-top:10px">
+          <thead><tr><th>Point</th><th>Phase-Earth (MΩ)</th><th>Min Limit</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>Stator Winding</td><td><input type="number" class="meg-val" placeholder="MΩ" step="0.01" data-limit="1"/></td><td style="color:var(--teal-br)">≥ 1 MΩ</td><td class="meg-res">—</td></tr>
+            <tr><td>Field Winding</td><td><input type="number" class="meg-val" placeholder="MΩ" step="0.01" data-limit="0.5"/></td><td style="color:var(--teal-br)">≥ 0.5 MΩ</td><td class="meg-res">—</td></tr>
+            <tr><td>Main Bus Bars (Ph-E)</td><td><input type="number" class="meg-val" placeholder="MΩ" step="0.01" data-limit="1"/></td><td style="color:var(--teal-br)">≥ 1 MΩ</td><td class="meg-res">—</td></tr>
+            <tr><td>Feeder Cables</td><td><input type="number" class="meg-val" placeholder="MΩ" step="0.01" data-limit="1"/></td><td style="color:var(--teal-br)">≥ 1 MΩ</td><td class="meg-res">—</td></tr>
+          </tbody>
+        </table>
+        <div class="form-group" style="margin-top:10px"><label>Megger Remarks</label><textarea name="megRemarks" placeholder="Overall insulation condition, any areas of concern..."></textarea></div>
+      </form>
     </div>
   </div>
 
@@ -318,6 +390,83 @@ function saveDG() {
 }
 
 function markDone() { saveDG(); setModuleStatus('dgtest','done'); toast('D.G. Test marked complete ✓','pass'); }
+
+// ── Per-DG unit switching ──────────────────────────
+let currentDG = EP.load('dg-active-unit','dg1');
+function switchDG(unit) {
+  saveDG(); // save current before switching
+  currentDG = unit;
+  EP.save('dg-active-unit', unit);
+  document.querySelectorAll('.dg-tab').forEach(b => {
+    b.className = b.dataset.unit === unit ? 'btn btn-primary dg-tab' : 'btn btn-outline dg-tab';
+  });
+  const labels = { dg1:'DG No.1', dg2:'DG No.2', dg3:'DG No.3' };
+  document.getElementById('dg-unit-label').textContent = `(${labels[unit]||unit})`;
+  // reload saved data for this unit
+  const unitSaved = EP.load('dg-form-'+unit, {});
+  Object.entries(unitSaved).forEach(([k,v]) => {
+    const el = document.getElementById(k) || document.querySelector(`[name="${k}"]`);
+    if (!el) return;
+    if (el.type==='radio') { const r = document.querySelector(`[name="${k}"][value="${v}"]`); if(r) r.checked=true; }
+    else el.value = v;
+  });
+  // reload gov + megger
+  const govSaved = EP.load('gov-form-'+unit, {});
+  document.querySelectorAll('#gov-form [name]').forEach(el => { if(govSaved[el.name]) el.value=govSaved[el.name]; });
+  const megSaved = EP.load('meg-form-'+unit, {});
+  document.querySelectorAll('#meg-form [name]').forEach(el => { if(megSaved[el.name]) el.value=megSaved[el.name]; });
+  renderLoadTable(); recalc();
+  toast(`Switched to ${labels[unit]}`, 'info');
+}
+// Override saveDG to save per-unit
+const _saveDG = saveDG;
+function saveDGUnit() {
+  const data = { ...EP.load('dg-form-'+currentDG,{}) };
+  document.querySelectorAll('#load-body input, #load-body select').forEach(el => { if(el.name) data[el.name]=el.value; });
+  document.querySelectorAll('input[type=radio]:checked').forEach(r => data[r.name]=r.value);
+  ['dg-set','dg-date','dg-location','dg-remarks','dg-ambient','rated-kva','rated-kw','rated-v','rated-hz','rated-pf','rated-rpm'].forEach(id => {
+    const el = document.getElementById(id); if(el) data[id]=el.value;
+  });
+  EP.save('dg-form-'+currentDG, data);
+  // Gov form
+  const govData = {};
+  document.querySelectorAll('#gov-form [name]').forEach(el => govData[el.name]=el.value);
+  EP.save('gov-form-'+currentDG, govData);
+  // Meg form
+  const megData = {};
+  document.querySelectorAll('#meg-form [name]').forEach(el => megData[el.name]=el.value);
+  EP.save('meg-form-'+currentDG, megData);
+  toast('D.G. test data saved', 'pass');
+}
+// Rebind saveDG button
+document.querySelector('[onclick="saveDG()"]')?.setAttribute('onclick','saveDGUnit()');
+document.querySelector('[onclick="markDone()"]')?.setAttribute('onclick',"saveDGUnit();setModuleStatus('dgtest','done');toast('D.G. Test marked complete ✓','pass')");
+
+// Governor recovery badges
+['gov-off-rec','gov-on-rec'].forEach((id, idx) => {
+  document.getElementById(id)?.addEventListener('input', function() {
+    const v = parseFloat(this.value);
+    const badgeId = idx===0 ? 'gov-off-badge' : 'gov-on-badge';
+    document.getElementById(badgeId).innerHTML = isNaN(v) ? '—'
+      : v <= 5 ? '<span class="badge badge-pass">✓ PASS ≤5 sec</span>'
+               : '<span class="badge badge-fail">✗ FAIL &gt;5 sec</span>';
+  });
+});
+
+// Megger auto-result
+document.querySelectorAll('.meg-val').forEach(inp => {
+  inp.addEventListener('input', function() {
+    const v = parseFloat(this.value);
+    const lim = parseFloat(this.dataset.limit);
+    const res = this.closest('tr').querySelector('.meg-res');
+    res.innerHTML = isNaN(v) ? '—'
+      : v >= lim ? '<span class="badge badge-pass">PASS</span>'
+                 : '<span class="badge badge-fail">FAIL</span>';
+  });
+});
+
+// Init tab
+switchDG(currentDG);
 
 function exportDGExcel() {
   const rows = STEPS.map((s,i) => ({

@@ -129,9 +129,56 @@
     </div>
   </div>
 
-  <!-- G. Overall Result -->
+  <!-- G. Fuel Changeover Test -->
   <div class="section">
-    <div class="section-title">G. Overall Commissioning Result</div>
+    <div class="section-title">G. Fuel Changeover Test (HFO ↔ MDO)</div>
+    <div class="callout">Perform changeover under load (typically 50–75% MCR). Record fuel system parameters before, during, and after changeover to confirm smooth transition without engine disturbance.</div>
+    <div class="card">
+      <div class="form-row col-4">
+        <div class="form-group"><label>Test Date &amp; Time</label><input type="datetime-local" name="fcDate"/></div>
+        <div class="form-group"><label>Engine Load at Test (%)</label><input type="number" name="fcLoad" placeholder="50–75%"/></div>
+        <div class="form-group"><label>Changeover Direction</label>
+          <select name="fcDirection">
+            <option>HFO → MDO (distillate)</option>
+            <option>MDO → HFO (residual)</option>
+            <option>Both directions</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Changeover Duration (min)</label><input type="number" name="fcDuration" placeholder="min" step="0.5"/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>HFO Temp before change (°C)</label><input type="number" name="fcHfoTemp" placeholder="°C"/></div>
+        <div class="form-group"><label>HFO Viscosity (cSt)</label><input type="number" name="fcHfoVisc" placeholder="cSt" step="0.1"/></div>
+        <div class="form-group"><label>MDO Temp before change (°C)</label><input type="number" name="fcMdoTemp" placeholder="°C"/></div>
+        <div class="form-group"><label>MDO Viscosity (cSt)</label><input type="number" name="fcMdoVisc" placeholder="cSt" step="0.1"/></div>
+      </div>
+      <div class="form-row col-4">
+        <div class="form-group"><label>Engine RPM before (RPM)</label><input type="number" name="fcRpmBefore" placeholder="RPM"/></div>
+        <div class="form-group"><label>Engine RPM after (RPM)</label><input type="number" name="fcRpmAfter" placeholder="RPM"/></div>
+        <div class="form-group"><label>Exhaust Temp before (°C)</label><input type="number" name="fcExhBefore" placeholder="°C"/></div>
+        <div class="form-group"><label>Exhaust Temp after (°C)</label><input type="number" name="fcExhAfter" placeholder="°C"/></div>
+      </div>
+      <div class="form-row col-3">
+        <div class="form-group"><label>Fuel Pressure during change (bar)</label><input type="number" name="fcFuelPres" step="0.1" placeholder="bar"/></div>
+        <div class="form-group"><label>Alarms during Changeover</label>
+          <select name="fcAlarms"><option value="none">None</option><option value="yes">Yes (describe in remarks)</option></select>
+        </div>
+        <div class="form-group"><label>Overall Changeover Result</label>
+          <select name="fcResult">
+            <option value="">— Select —</option>
+            <option value="pass">PASS — Smooth changeover</option>
+            <option value="minor">MINOR ISSUE — Engine recovered</option>
+            <option value="fail">FAIL — Engine tripped / investigation required</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Remarks</label><textarea name="fcRemarks" placeholder="RPM dip, hunting, exhaust colour change, alarm activations, abnormal behaviour..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- H. Overall Result -->
+  <div class="section">
+    <div class="section-title">H. Overall Commissioning Result</div>
     <div class="card">
       <div class="form-row col-2">
         <div class="form-group"><label>Overall Result</label>
@@ -286,10 +333,28 @@ function exportCommExcel() {
     'Unit': d.unit, 'Result': saved[`st_res_${i}`]||'—', 'Remark': saved[`st_rem_${i}`]||''
   }));
   const alarmRows = ALARM_ITEMS.map((item,i) => ({ 'Alarm/Shutdown': item, 'Result': saved[`al_${i}`]||'—' }));
+  const fuelRows = [{
+    'Direction': saved['fcDirection']||'',
+    'Load (%)': saved['fcLoad']||'',
+    'Duration (min)': saved['fcDuration']||'',
+    'HFO Temp (°C)': saved['fcHfoTemp']||'',
+    'HFO Viscosity (cSt)': saved['fcHfoVisc']||'',
+    'MDO Temp (°C)': saved['fcMdoTemp']||'',
+    'MDO Viscosity (cSt)': saved['fcMdoVisc']||'',
+    'RPM Before': saved['fcRpmBefore']||'',
+    'RPM After': saved['fcRpmAfter']||'',
+    'Exh Temp Before (°C)': saved['fcExhBefore']||'',
+    'Exh Temp After (°C)': saved['fcExhAfter']||'',
+    'Fuel Pres (bar)': saved['fcFuelPres']||'',
+    'Alarms': saved['fcAlarms']||'',
+    'Result': saved['fcResult']||'',
+    'Remarks': saved['fcRemarks']||'',
+  }];
   exportExcel([
     { name:'Pre-Start Checks', data: preRows },
     { name:'Safety Device Trips', data: safeRows },
     { name:'Alarm Tests', data: alarmRows },
+    { name:'Fuel Changeover', data: fuelRows },
   ], `Commissioning_${getProject().vesselName||'vessel'}.xlsx`);
 }
 </script>

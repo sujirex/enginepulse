@@ -81,6 +81,7 @@
             <tr>
               <th>RPM</th><th>MCR%</th><th>Power(kW)</th><th>Speed(kn)</th>
               <th>Fuel(kg/h)</th><th>SFOC*</th>
+              <th style="color:#f59e0b">Maker SFOC*</th>
               <th>T/C In(°C)</th><th>T/C Out(°C)</th>
               <th>Exh Avg(°C)</th><th>Charge Air(bar)</th>
               <th>LO Press(bar)</th><th>LO Temp(°C)</th><th>Cool Temp(°C)</th>
@@ -118,9 +119,77 @@
     </div>
   </div>
 
+  <!-- Individual Cylinder Exhaust Temps -->
+  <div class="section">
+    <div class="section-title">E. Individual Cylinder Exhaust Temperatures</div>
+    <div class="callout">Record per-cylinder exhaust temps at NCR / full load step. Max deviation from mean should not exceed maker's limit (typically ±30°C for 2-stroke).</div>
+    <div class="card">
+      <div class="form-row col-3" style="margin-bottom:10px">
+        <div class="form-group"><label>No. of Cylinders</label><select id="cyl-count"><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="12">12</option></select></div>
+        <div class="form-group"><label>RPM at Reading</label><input type="number" id="cyl-rpm" placeholder="RPM"/></div>
+        <div class="form-group"><label>Maker's Max Deviation (°C)</label><input type="number" id="cyl-dev-limit" placeholder="30" value="30"/></div>
+      </div>
+      <table class="data-table" id="cyl-table">
+        <thead><tr id="cyl-header"></tr></thead>
+        <tbody><tr id="cyl-row"></tr></tbody>
+      </table>
+      <div class="form-row col-3" style="margin-top:10px">
+        <div class="form-group"><label>Mean Exhaust Temp (°C)*</label><div id="cyl-mean" style="font-size:18px;font-weight:700;color:var(--teal-br)">—</div></div>
+        <div class="form-group"><label>Max Deviation (°C)*</label><div id="cyl-maxdev">—</div></div>
+        <div class="form-group"><label>Balance Result</label><div id="cyl-result">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Steering Gear Test -->
+  <div class="section">
+    <div class="section-title">F. Steering Gear Test</div>
+    <div class="card">
+      <form id="steering-form">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Hard-over to Hard-over Time (sec)</label><input type="number" name="stHardOver" placeholder="≤ 28 sec at NCR" step="0.1"/></div>
+          <div class="form-group"><label>Class Limit (sec)</label><div style="margin-top:6px;font-size:12px;color:var(--text-dim)">SOLAS: ≤ 28 sec (15°→35° each side)</div></div>
+          <div class="form-group"><label>Hard-over Test Result</label><div id="steering-result" style="margin-top:6px">—</div></div>
+        </div>
+        <div class="form-row col-4">
+          <div class="form-group"><label>Rudder Angle: Port Full (°)</label><input type="number" name="stPortAngle" placeholder="35"/></div>
+          <div class="form-group"><label>Rudder Angle: Stbd Full (°)</label><input type="number" name="stStbdAngle" placeholder="35"/></div>
+          <div class="form-group"><label>Helm to Rudder Response (sec)</label><input type="number" name="stHelmResp" placeholder="sec" step="0.1"/></div>
+          <div class="form-group"><label>Autopilot Engaged</label><select name="stAutopilot"><option value="">—</option><option value="yes">Yes — tested</option><option value="no">No / Not fitted</option></select></div>
+        </div>
+        <div class="form-row col-3">
+          <div class="form-group"><label>Emergency Steering (local) Test</label><select name="stEmergency"><option value="">—</option><option value="pass">PASS — Operated correctly</option><option value="fail">FAIL</option><option value="na">N/A</option></select></div>
+          <div class="form-group"><label>Power Unit 1 Solo Test</label><select name="stPu1"><option value="">—</option><option value="pass">PASS</option><option value="fail">FAIL</option></select></div>
+          <div class="form-group"><label>Power Unit 2 Solo Test</label><select name="stPu2"><option value="">—</option><option value="pass">PASS</option><option value="fail">N/A</option></select></div>
+        </div>
+        <div class="form-group"><label>Steering Gear Remarks</label><textarea name="stRemarks" placeholder="Observations, hunting, response time, any issues..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Vibration Measurement -->
+  <div class="section">
+    <div class="section-title">G. Vibration Measurement (ISO 6954)</div>
+    <div class="callout">Structural vibration per ISO 6954:2000. Acceptable overall weighted RMS: ≤ 4 mm/s (crew spaces) and ≤ 6 mm/s (working areas).</div>
+    <div class="card">
+      <form id="vibration-form">
+        <div class="form-row col-3">
+          <div class="form-group"><label>Measurement RPM</label><input type="number" name="vibRpm" placeholder="NCR RPM"/></div>
+          <div class="form-group"><label>Instrument / Make</label><input type="text" name="vibInstrument" placeholder="Brüel & Kjær / VM-2000"/></div>
+          <div class="form-group"><label>Measurement Date</label><input type="date" name="vibDate"/></div>
+        </div>
+        <table class="data-table" style="margin-top:10px">
+          <thead><tr><th>Location</th><th>Vertical (mm/s)</th><th>Transverse (mm/s)</th><th>Longitudinal (mm/s)</th><th>Limit (mm/s)</th><th>Result</th></tr></thead>
+          <tbody id="vib-body"></tbody>
+        </table>
+        <div class="form-group" style="margin-top:10px"><label>Vibration Remarks</label><textarea name="vibRemarks" placeholder="Any resonance, peak frequencies, locations of concern..."></textarea></div>
+      </form>
+    </div>
+  </div>
+
   <!-- Maneuvering -->
   <div class="section">
-    <div class="section-title">E. Maneuvering Test</div>
+    <div class="section-title">H. Maneuvering Test</div>
     <div class="card">
       <div class="checklist" id="maneuver-list"></div>
       <div class="form-row col-2" style="margin-top:14px">
@@ -133,7 +202,7 @@
 
   <!-- Fuel Consumption -->
   <div class="section">
-    <div class="section-title">F. Fuel Consumption Trial</div>
+    <div class="section-title">I. Fuel Consumption Trial</div>
     <div class="card">
       <div class="form-row col-4">
         <div class="form-group"><label>Trial Duration (hrs)</label><input type="number" id="fc-duration" step="0.5" placeholder="4"/></div>
@@ -152,7 +221,7 @@
 
   <!-- Overall -->
   <div class="section">
-    <div class="section-title">G. Overall Sea Trial Result</div>
+    <div class="section-title">J. Overall Sea Trial Result</div>
     <div class="card">
       <div class="form-row col-2">
         <div><label>Overall Result</label>
@@ -263,6 +332,7 @@ function renderPerfTable() {
       <td><input type="number" name="pf_spd_${i}" value="${r.spd||''}" step="0.1"/></td>
       <td><input type="number" name="pf_fuel_${i}" value="${r.fuel||''}" step="0.1" oninput="calcSFOCRow(${i})"/></td>
       <td style="color:var(--teal-br);font-family:'Roboto Mono',monospace;font-weight:600" id="sfoc_${i}">—</td>
+      <td><input type="number" name="pf_msfoc_${i}" value="${r.msfoc||''}" placeholder="Maker" step="0.1" style="color:#f59e0b;font-weight:600"/></td>
       <td><input type="number" name="pf_tcin_${i}"  value="${r.tcin||''}"/></td>
       <td><input type="number" name="pf_tcout_${i}" value="${r.tcout||''}"/></td>
       <td><input type="number" name="pf_exh_${i}"   value="${r.exh||''}"/></td>
@@ -311,6 +381,74 @@ function renderChecklist(id, items, prefix) {
 renderSpeedTable();
 renderPerfTable();
 renderChecklist('maneuver-list', MANEUVER, 'mv');
+
+// ── Cylinder Exhaust Table ──────────────────────────
+function renderCylTable() {
+  const n = parseInt(document.getElementById('cyl-count').value)||6;
+  const hdr = document.getElementById('cyl-header');
+  const row = document.getElementById('cyl-row');
+  hdr.innerHTML = '<th>Cyl No.</th>' + Array.from({length:n},(_,i)=>`<th>Cyl ${i+1}</th>`).join('');
+  row.innerHTML = '<td style="font-weight:600;color:var(--teal-br)">Exh Temp (°C)</td>' +
+    Array.from({length:n},(_,i)=>`<td><input type="number" class="cyl-temp" id="cyl-t${i}" placeholder="°C" oninput="calcCylStats()"/></td>`).join('');
+}
+function calcCylStats() {
+  const n = parseInt(document.getElementById('cyl-count').value)||6;
+  const vals = Array.from({length:n},(_,i)=>parseFloat(document.getElementById(`cyl-t${i}`)?.value)).filter(v=>!isNaN(v));
+  if (!vals.length) return;
+  const mean = vals.reduce((a,b)=>a+b,0)/vals.length;
+  const maxDev = Math.max(...vals.map(v=>Math.abs(v-mean)));
+  const limit = parseFloat(document.getElementById('cyl-dev-limit').value)||30;
+  document.getElementById('cyl-mean').textContent = mean.toFixed(1) + ' °C';
+  document.getElementById('cyl-maxdev').textContent = maxDev.toFixed(1) + ' °C';
+  document.getElementById('cyl-result').innerHTML = maxDev <= limit
+    ? '<span class="badge badge-pass">✓ BALANCED</span>'
+    : '<span class="badge badge-fail">✗ UNBALANCED</span>';
+}
+document.getElementById('cyl-count').addEventListener('change', renderCylTable);
+document.getElementById('cyl-dev-limit').addEventListener('input', calcCylStats);
+renderCylTable();
+
+// ── Steering gear auto-result ───────────────────────
+document.querySelector('[name="stHardOver"]')?.addEventListener('input', function() {
+  const v = parseFloat(this.value);
+  document.getElementById('steering-result').innerHTML = isNaN(v) ? '—'
+    : v <= 28 ? '<span class="badge badge-pass">✓ PASS ≤28 sec</span>'
+              : '<span class="badge badge-fail">✗ FAIL &gt;28 sec</span>';
+});
+autoSaveForm('steering-form','st-steering');
+autoSaveForm('vibration-form','st-vibration');
+
+// ── Vibration table ─────────────────────────────────
+const VIB_LOCATIONS = [
+  ['Bridge / Wheelhouse (crew)','4'],
+  ['Accommodation (crew)','4'],
+  ['Engine Control Room','6'],
+  ['Main Engine top platform','6'],
+  ['Stern area (above propeller)','6'],
+  ['Bow thruster room (if fitted)','6'],
+];
+const vibb = document.getElementById('vib-body');
+VIB_LOCATIONS.forEach(([loc, lim]) => {
+  vibb.innerHTML += `<tr>
+    <td>${loc}</td>
+    <td><input type="number" class="vib-val" placeholder="mm/s" step="0.01" data-limit="${lim}"/></td>
+    <td><input type="number" class="vib-val" placeholder="mm/s" step="0.01" data-limit="${lim}"/></td>
+    <td><input type="number" class="vib-val" placeholder="mm/s" step="0.01" data-limit="${lim}"/></td>
+    <td style="color:var(--teal-br)">≤ ${lim} mm/s</td>
+    <td class="vib-res">—</td>
+  </tr>`;
+});
+document.querySelectorAll('.vib-val').forEach(inp => {
+  inp.addEventListener('input', () => {
+    const row = inp.closest('tr');
+    const vals = [...row.querySelectorAll('.vib-val')].map(i=>parseFloat(i.value)).filter(v=>!isNaN(v));
+    const lim = parseFloat(inp.dataset.limit);
+    const fail = vals.some(v => v > lim);
+    row.querySelector('.vib-res').innerHTML = vals.length
+      ? fail ? '<span class="badge badge-fail">EXCEED</span>' : '<span class="badge badge-pass">OK</span>'
+      : '—';
+  });
+});
 
 function saveST() { toast('Sea trial data saved','pass'); }
 function markDone() { saveST(); setModuleStatus('seatrial','done'); toast('Sea Trial marked complete ✓','pass'); }
