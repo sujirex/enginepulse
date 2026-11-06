@@ -5,25 +5,96 @@
 'use strict';
 
 // ── Theme ──────────────────────────────────────────
+// The saved choice wins; otherwise follow the device setting.
+// A small script in each page <head> applies it before first paint.
 const THEME_KEY = 'enginepulse-theme';
 
-function applyTheme(t) {
+function savedTheme() {
+  try { const t = localStorage.getItem(THEME_KEY); return (t === 'light' || t === 'dark') ? t : null; } catch { return null; }
+}
+function systemTheme() { return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+function currentTheme() { return document.documentElement.getAttribute('data-theme') || savedTheme() || systemTheme(); }
+
+function applyTheme(t, persist) {
   document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem(THEME_KEY, t);
+  if (persist) { try { localStorage.setItem(THEME_KEY, t); } catch {} }
   const btn = document.getElementById('btn-theme');
-  if (!btn) return;
-  btn.innerHTML = t === 'dark'
-    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`
-    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  if (btn) {
+    btn.innerHTML = t === 'dark' ? epIcon('sun') : epIcon('moon');
+    btn.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+  epChartTheme();
 }
 
 function initTheme() {
-  const t = localStorage.getItem(THEME_KEY) || 'dark';
-  applyTheme(t);
+  applyTheme(currentTheme(), false);
   document.getElementById('btn-theme')?.addEventListener('click', () => {
-    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
-    applyTheme(cur === 'dark' ? 'light' : 'dark');
+    applyTheme(currentTheme() === 'dark' ? 'light' : 'dark', true);
   });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!savedTheme()) applyTheme(systemTheme(), false);
+  });
+}
+
+// ── Brand colour tokens (for charts and canvas drawing) ──
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+// Chart.js defaults follow the current theme; existing charts are refreshed on toggle.
+function epChartTheme() {
+  if (typeof Chart === 'undefined') return;
+  const muted = cssVar('--muted') || '#4B5263';
+  const grid = (currentTheme() === 'dark') ? 'rgba(255,255,255,0.08)' : 'rgba(10,11,18,0.08)';
+  Chart.defaults.color = muted;
+  Chart.defaults.borderColor = grid;
+  Chart.defaults.font.family = "'Geist', system-ui, sans-serif";
+  Chart.defaults.font.size = 11;
+  Object.values(Chart.instances || {}).forEach(ch => {
+    Object.values(ch.options.scales || {}).forEach(sc => {
+      if (sc.grid) sc.grid.color = grid;
+      if (sc.ticks) sc.ticks.color = muted;
+      if (sc.title) sc.title.color = muted;
+    });
+    if (ch.options.plugins?.legend?.labels) ch.options.plugins.legend.labels.color = muted;
+    ch.update('none');
+  });
+}
+
+// ── Line icons (replace emoji) ─────────────────────
+const EP_ICONS = {
+  save:'<path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/>',
+  sheet:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/>',
+  printer:'<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+  pen:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  file:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  clipboard:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.5h6V4M9 10h6M9 14h6M9 18h4"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.8-2.8z"/>',
+  zap:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  siren:'<path d="M7 18v-6a5 5 0 0 1 10 0v6"/><path d="M5 18h14v3H5zM12 2v2M4.2 5.2l1.4 1.4M19.8 5.2l-1.4 1.4"/>',
+  plug:'<path d="M9 2v6M15 2v6M6 8h12v3a6 6 0 0 1-12 0zM12 17v5"/>',
+  ship:'<path d="M3 17l2 4h14l2-4-9-3z"/><path d="M6 15V9h12v6M12 9V4M9 6h6"/>',
+  timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>',
+  trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  book:'<path d="M4 4h6a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h7z"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  cog:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  nut:'<path d="M12 2l8.7 5v10L12 22l-8.7-5V7z"/><circle cx="12" cy="12" r="3.5"/>',
+  hammer:'<path d="M14 6l4 4M3 21l9-9M12 4l6 6-3 3-6-6z"/>',
+  crane:'<path d="M4 21V5l10-2v4M4 7h16M18 7v6M16 13h4v3h-4zM2 21h8"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+  close:'<path d="M6 6l12 12M18 6 6 18"/>',
+};
+function epIcon(name) {
+  const d = EP_ICONS[name]; if (!d) return '';
+  return `<span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span>`;
+}
+function hydrateIcons(root) {
+  (root || document).querySelectorAll('i[data-ic]').forEach(el => { el.outerHTML = epIcon(el.dataset.ic); });
 }
 
 // ── Storage helpers ────────────────────────────────
@@ -62,24 +133,47 @@ function buildNavbar(activeKey) {
   const el = document.getElementById('navbar');
   if (!el) return;
   const proj = getProject();
-  const vesselName = proj.vesselName ? `<span style="font-size:11px;color:var(--text-dim);margin-left:4px">${proj.vesselName}</span>` : '';
+  const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const vesselName = proj.vesselName ? `<span class="nav-vessel" title="${esc(proj.vesselName)}">${esc(proj.vesselName)}</span>` : '';
+  const links = NAV_LINKS.map(l => `<a class="nav-link${l.key===activeKey?' active':''}" href="${l.href}"${l.key===activeKey?' aria-current="page"':''}>${l.label}</a>`).join('');
   el.innerHTML = `
-    <a class="nav-logo" href="index.html">
-      <div class="nav-logo-icon">⚙️</div>
-      <div>
-        <span class="nav-logo-name">EnginePulse</span>
-        <span class="nav-logo-sub">Engine Test Suite</span>
+    <div class="nav-bar">
+      <a class="nav-logo" href="index.html">
+        <img src="favicon.svg" alt="SS emblem" width="36" height="36">
+        <span>
+          <span class="nav-logo-name">EnginePulse</span>
+          <span class="nav-logo-sub">Engine Test Suite</span>
+        </span>
+      </a>
+      ${vesselName}
+      <nav class="nav-links" aria-label="Modules">${links}</nav>
+      <div class="nav-right">
+        <button class="btn-icon" id="btn-theme" type="button" title="Toggle theme"></button>
+        <button class="btn-icon" id="btn-menu" type="button" aria-label="Open menu" aria-expanded="false">${epIcon('menu')}</button>
       </div>
-    </a>
-    ${vesselName}
-    <nav class="nav-links">
-      ${NAV_LINKS.map(l => `<a class="nav-link${l.key===activeKey?' active':''}" href="${l.href}">${l.label}</a>`).join('')}
-    </nav>
-    <div class="nav-right">
-      <button class="btn-icon" id="btn-theme" title="Toggle theme"></button>
     </div>
+    <nav class="nav-menu" id="nav-menu" aria-label="Modules">${links}</nav>
   `;
+  const menuBtn = document.getElementById('btn-menu');
+  const menu = document.getElementById('nav-menu');
+  menuBtn.addEventListener('click', () => {
+    const open = menu.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open);
+    menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    menuBtn.innerHTML = epIcon(open ? 'close' : 'menu');
+  });
   initTheme();
+  buildCredit();
+  hydrateIcons();
+}
+
+// ── sujikumar.com credit badge (one place for every page) ──
+function buildCredit() {
+  if (document.querySelector('.ss-credit')) return;
+  const div = document.createElement('div');
+  div.className = 'ss-credit';
+  div.innerHTML = `<a href="https://sujikumar.com/" rel="author" title="Built by Suji Kumar C — Digital Maritime Engineer"><img src="favicon.svg" alt="" width="20" height="20"><span>Built by <b>Suji Kumar C</b> · sujikumar.com</span></a>`;
+  document.body.appendChild(div);
 }
 
 // ── Vessel header strip ─────────────────────────────
@@ -212,11 +306,10 @@ function printSection(id) {
   const clone = el.cloneNode(true);
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-      body{font-family:Roboto,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
+      body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:12px;color:#000;background:#fff;padding:20px}
       table{width:100%;border-collapse:collapse}th,td{padding:6px 8px;border:1px solid #ccc;font-size:11px}
-      th{background:#e0f0f0;font-weight:600} .no-print{display:none}
+      th{background:#F3F4F8;font-weight:600} .no-print{display:none}
     </style></head><body>${clone.innerHTML}</body></html>`);
   win.document.close();
   win.print();
@@ -224,10 +317,10 @@ function printSection(id) {
 
 // ── Toast ────────────────────────────────────────────
 function toast(msg, type = 'info') {
-  const colors = { info:'var(--teal-br)', pass:'var(--pass)', fail:'var(--fail)', warn:'var(--warn)' };
+  const colors = { info:'var(--action)', pass:'var(--pass)', fail:'var(--fail)', warn:'var(--warn)' };
   const el = document.createElement('div');
   el.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:9999;
-    padding:10px 16px;border-radius:9px;font-size:13px;font-weight:500;
+    padding:10px 16px;border-radius:14px;font-size:13px;font-weight:500;
     background:var(--bg-card);border:1px solid ${colors[type]||'var(--border)'};
     color:${colors[type]||'var(--text)'};box-shadow:var(--shadow);
     animation:toastIn .25s ease;max-width:320px;`;

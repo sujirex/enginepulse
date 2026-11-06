@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <script>(function(){var t=null;try{t=localStorage.getItem('enginepulse-theme')}catch(e){}if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})();</script>
+  <meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#07080D" media="(prefers-color-scheme: dark)"/>
+  <link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin/>
   <meta name="author" content="Suji Kumar C" /><link rel="icon" type="image/svg+xml" href="favicon.svg"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>EnginePulse — D.G. Load Test</title>
@@ -12,7 +16,7 @@
     .pf-label { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; }
     .pf-val   { font-size:20px; font-weight:700; font-family:'Roboto Mono',monospace; color:var(--teal-br); }
     .pf-status { margin-top:4px; }
-    td.calc { background:rgba(13,200,200,0.04); color:var(--teal-br); font-family:'Roboto Mono',monospace; font-weight:600; }
+    td.calc { background:color-mix(in srgb, var(--signal) 6%, transparent); color:var(--signal); font-family:var(--mono); font-weight:600; }
   </style>
 </head>
 <body>
@@ -20,7 +24,7 @@
 <div class="page">
   <div class="breadcrumb"><a href="index.html">Dashboard</a> › D.G. Load Test</div>
   <div class="page-header">
-    <div class="page-title">⚡ D.G. Load Test</div>
+    <div class="page-title"><i data-ic="zap"></i> D.G. Load Test</div>
     <div class="page-sub">Step load 0 → 110% · Auto voltage / frequency regulation · Pass / Fail vs class limits</div>
   </div>
   <div id="vessel-strip"></div>
@@ -209,17 +213,17 @@
   </div>
 
   <div class="btn-row no-print">
-    <button class="btn btn-primary" onclick="saveDG()">💾 Save</button>
+    <button class="btn btn-primary" onclick="saveDG()"><i data-ic="save"></i> Save</button>
     <button class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
-    <button class="btn btn-outline" onclick="exportDGExcel()">📊 Export Excel</button>
-    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
-    <a href="signoff.html" class="btn btn-outline">✍️ Go to Sign-off</a>
+    <button class="btn btn-outline" onclick="exportDGExcel()"><i data-ic="sheet"></i> Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()"><i data-ic="printer"></i> Print</button>
+    <a href="signoff.html" class="btn btn-outline"><i data-ic="pen"></i> Go to Sign-off</a>
   </div>
 </div>
 <footer>EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/vendor/chart.umd.min.js"></script>
+<script src="js/vendor/xlsx.full.min.js"></script>
 <script src="js/common.js"></script>
 <script>
 buildNavbar('dgtest');
@@ -301,7 +305,7 @@ function renderLoadTable() {
 }
 renderLoadTable();
 
-let dgChart;
+var dgChart; // var: renderLoadTable() above draws the chart before this line runs
 function recalc() {
   const kvas=[], kws=[], freqs=[], volts=[];
   STEPS.forEach((s,i) => {
@@ -359,18 +363,18 @@ function recalc() {
     data: {
       labels,
       datasets: [
-        { type:'bar',  label:'kW',  data:kws,  backgroundColor:'rgba(13,200,200,0.3)', borderColor:'#0DC8C8', borderWidth:1, yAxisID:'y' },
-        { type:'line', label:'V',   data:volts, borderColor:'#f59e0b', tension:.3, yAxisID:'y2', fill:false },
-        { type:'line', label:'Hz',  data:freqs, borderColor:'#22c55e', tension:.3, yAxisID:'y2', fill:false },
+        { type:'bar',  label:'kW',  data:kws,  backgroundColor:cssVar('--g1')+'4D', borderColor:cssVar('--g1'), borderWidth:1, yAxisID:'y' },
+        { type:'line', label:'V',   data:volts, borderColor:cssVar('--t-warn'), tension:.3, yAxisID:'y2', fill:false },
+        { type:'line', label:'Hz',  data:freqs, borderColor:cssVar('--ok'), tension:.3, yAxisID:'y2', fill:false },
       ]
     },
     options: {
       responsive:true, interaction:{mode:'index',intersect:false},
-      plugins:{ legend:{labels:{color:'#7ACFCF',font:{family:'Roboto'}}} },
+      plugins:{ legend:{labels:{}} },
       scales:{
-        y:  { grid:{color:'rgba(10,150,150,0.1)'}, ticks:{color:'#7ACFCF'}, title:{display:true,text:'kW',color:'#7ACFCF'} },
-        y2: { position:'right', grid:{drawOnChartArea:false}, ticks:{color:'#7ACFCF'}, title:{display:true,text:'V / Hz',color:'#7ACFCF'} },
-        x:  { grid:{color:'rgba(10,150,150,0.1)'}, ticks:{color:'#7ACFCF'} },
+        y:  { grid:{}, ticks:{}, title:{display:true,text:'kW'} },
+        y2: { position:'right', grid:{drawOnChartArea:false}, ticks:{}, title:{display:true,text:'V / Hz'} },
+        x:  { grid:{}, ticks:{} },
       }
     }
   });
@@ -487,6 +491,5 @@ function exportDGExcel() {
   exportExcel([{ name:'DG Load Test', data: rows }], `DGTest_${getProject().vesselName||'vessel'}.xlsx`);
 }
 </script>
-<!-- sujikumar.com credit --><style id="ss-credit-css">.ss-credit{display:flex;justify-content:center;padding:16px 12px 20px;font:500 12px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}.ss-credit a{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;color:inherit;opacity:.78;text-decoration:none;border:1px solid rgba(148,163,184,.35);transition:opacity .2s,border-color .2s}.ss-credit a:hover{opacity:1;border-color:#8B5CF6}.ss-credit img{width:20px;height:20px;border-radius:5px;display:block}.ss-credit b{font-weight:600}.ss-credit--fixed{position:fixed;left:10px;bottom:10px;z-index:9999;padding:0}.ss-credit--fixed a{background:rgba(11,15,20,.72);color:#e6eaf0;opacity:.9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}@media print{.ss-credit{display:none}}</style><div class="ss-credit"><a href="https://sujikumar.com/" rel="author" title="Built by Suji Kumar C — Digital Maritime Engineer"><img src="favicon.svg" alt="" width="20" height="20"><span>Built by <b>Suji Kumar C</b> · sujikumar.com</span></a></div>
 </body>
 </html>

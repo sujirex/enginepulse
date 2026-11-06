@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <script>(function(){var t=null;try{t=localStorage.getItem('enginepulse-theme')}catch(e){}if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})();</script>
+  <meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#07080D" media="(prefers-color-scheme: dark)"/>
+  <link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin/>
   <meta name="author" content="Suji Kumar C" /><link rel="icon" type="image/svg+xml" href="favicon.svg"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>EnginePulse — User Guide</title>
@@ -18,12 +22,12 @@
     .guide-section h3 { font-size:14px; margin:18px 0 8px; color:var(--text); border-left:3px solid var(--teal); padding-left:10px; }
     .guide-section p, .guide-section li { color:var(--text-dim); font-size:13px; line-height:1.7; margin-bottom:8px; }
     .guide-section ul { margin-left:18px; }
-    .tip { background:rgba(13,200,200,.07); border:1px solid rgba(13,200,200,.2); border-radius:8px; padding:10px 14px; font-size:12px; color:var(--teal-br); margin:10px 0; }
-    .warn { background:rgba(234,179,8,.07); border:1px solid rgba(234,179,8,.2); border-radius:8px; padding:10px 14px; font-size:12px; color:#f59e0b; margin:10px 0; }
+    .tip { background:color-mix(in srgb, var(--signal) 7%, var(--bg-card)); border:1px solid color-mix(in srgb, var(--signal) 25%, var(--border)); border-radius:12px; padding:10px 14px; font-size:12.5px; color:var(--signal); margin:10px 0; }
+    .warn { background:color-mix(in srgb, var(--warn) 7%, var(--bg-card)); border:1px solid color-mix(in srgb, var(--warn) 25%, var(--border)); border-radius:12px; padding:10px 14px; font-size:12.5px; color:var(--warn); margin:10px 0; }
     .badge-inline { display:inline-block; padding:1px 7px; border-radius:4px; font-size:11px; font-weight:600; margin:0 2px; }
-    .b-pass { background:rgba(34,197,94,.15); color:#22c55e; }
-    .b-fail { background:rgba(239,68,68,.15); color:#ef4444; }
-    .b-solas { background:rgba(10,150,150,.15); color:#0DC8C8; }
+    .b-pass { background:color-mix(in srgb, var(--pass) 14%, transparent); color:var(--pass); }
+    .b-fail { background:color-mix(in srgb, var(--fail) 14%, transparent); color:var(--fail); }
+    .b-solas { background:color-mix(in srgb, var(--signal) 14%, transparent); color:var(--signal); }
     .kbd { background:var(--bg-raised); border:1px solid var(--border); border-radius:4px; padding:1px 6px; font-size:11px; font-family:monospace; }
     @media(max-width:680px){ .guide-layout{grid-template-columns:1fr} .guide-toc{display:none} }
   </style>
@@ -33,7 +37,7 @@
 <div class="page" style="max-width:1100px">
   <div class="breadcrumb"><a href="index.html">Dashboard</a> &rsaquo; User Guide</div>
   <div class="page-header">
-    <div class="page-title">&#128214; User Guide</div>
+    <div class="page-title"><i data-ic="book"></i> User Guide</div>
     <div class="page-sub">Complete reference for all EnginePulse modules</div>
   </div>
 
@@ -413,6 +417,5 @@ const observer  = new IntersectionObserver(entries => {
 }, { rootMargin:'-60px 0px -80% 0px' });
 sections.forEach(s => observer.observe(s));
 </script>
-<!-- sujikumar.com credit --><style id="ss-credit-css">.ss-credit{display:flex;justify-content:center;padding:16px 12px 20px;font:500 12px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}.ss-credit a{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;color:inherit;opacity:.78;text-decoration:none;border:1px solid rgba(148,163,184,.35);transition:opacity .2s,border-color .2s}.ss-credit a:hover{opacity:1;border-color:#8B5CF6}.ss-credit img{width:20px;height:20px;border-radius:5px;display:block}.ss-credit b{font-weight:600}.ss-credit--fixed{position:fixed;left:10px;bottom:10px;z-index:9999;padding:0}.ss-credit--fixed a{background:rgba(11,15,20,.72);color:#e6eaf0;opacity:.9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}@media print{.ss-credit{display:none}}</style><div class="ss-credit"><a href="https://sujikumar.com/" rel="author" title="Built by Suji Kumar C — Digital Maritime Engineer"><img src="favicon.svg" alt="" width="20" height="20"><span>Built by <b>Suji Kumar C</b> · sujikumar.com</span></a></div>
 </body>
 </html>

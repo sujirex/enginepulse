@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <script>(function(){var t=null;try{t=localStorage.getItem('enginepulse-theme')}catch(e){}if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})();</script>
+  <meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#07080D" media="(prefers-color-scheme: dark)"/>
+  <link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin/>
   <meta name="author" content="Suji Kumar C" /><link rel="icon" type="image/svg+xml" href="favicon.svg"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>EnginePulse — Sea Trial</title>
@@ -12,7 +16,7 @@
 <div class="page">
   <div class="breadcrumb"><a href="index.html">Dashboard</a> › Sea Trial</div>
   <div class="page-header">
-    <div class="page-title">🚢 Sea Trial</div>
+    <div class="page-title"><i data-ic="ship"></i> Sea Trial</div>
     <div class="page-sub">Speed trial · Crash stop · Maneuvering · Performance table · Fuel consumption</div>
   </div>
   <div id="vessel-strip"></div>
@@ -82,7 +86,7 @@
             <tr>
               <th>RPM</th><th>MCR%</th><th>Power(kW)</th><th>Speed(kn)</th>
               <th>Fuel(kg/h)</th><th>SFOC*</th>
-              <th style="color:#f59e0b">Maker SFOC*</th>
+              <th style="color:var(--warn)">Maker SFOC*</th>
               <th>T/C In(°C)</th><th>T/C Out(°C)</th>
               <th>Exh Avg(°C)</th><th>Charge Air(bar)</th>
               <th>LO Press(bar)</th><th>LO Temp(°C)</th><th>Cool Temp(°C)</th>
@@ -238,15 +242,15 @@
   </div>
 
   <div class="btn-row no-print">
-    <button class="btn btn-primary" onclick="saveST()">💾 Save</button>
+    <button class="btn btn-primary" onclick="saveST()"><i data-ic="save"></i> Save</button>
     <button class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
-    <button class="btn btn-outline" onclick="exportSTExcel()">📊 Export Excel</button>
-    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
-    <a href="signoff.html" class="btn btn-outline">✍️ Go to Sign-off</a>
+    <button class="btn btn-outline" onclick="exportSTExcel()"><i data-ic="sheet"></i> Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()"><i data-ic="printer"></i> Print</button>
+    <a href="signoff.html" class="btn btn-outline"><i data-ic="pen"></i> Go to Sign-off</a>
   </div>
 </div>
 <footer>EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/vendor/xlsx.full.min.js"></script>
 <script src="js/common.js"></script>
 <script>
 buildNavbar('seatrial');
@@ -333,7 +337,7 @@ function renderPerfTable() {
       <td><input type="number" name="pf_spd_${i}" value="${r.spd||''}" step="0.1"/></td>
       <td><input type="number" name="pf_fuel_${i}" value="${r.fuel||''}" step="0.1" oninput="calcSFOCRow(${i})"/></td>
       <td style="color:var(--teal-br);font-family:'Roboto Mono',monospace;font-weight:600" id="sfoc_${i}">—</td>
-      <td><input type="number" name="pf_msfoc_${i}" value="${r.msfoc||''}" placeholder="Maker" step="0.1" style="color:#f59e0b;font-weight:600"/></td>
+      <td><input type="number" name="pf_msfoc_${i}" value="${r.msfoc||''}" placeholder="Maker" step="0.1" style="color:var(--warn);font-weight:600"/></td>
       <td><input type="number" name="pf_tcin_${i}"  value="${r.tcin||''}"/></td>
       <td><input type="number" name="pf_tcout_${i}" value="${r.tcout||''}"/></td>
       <td><input type="number" name="pf_exh_${i}"   value="${r.exh||''}"/></td>
@@ -481,6 +485,5 @@ function exportSTExcel() {
   ],`SeaTrial_${getProject().vesselName||'vessel'}.xlsx`);
 }
 </script>
-<!-- sujikumar.com credit --><style id="ss-credit-css">.ss-credit{display:flex;justify-content:center;padding:16px 12px 20px;font:500 12px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}.ss-credit a{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;color:inherit;opacity:.78;text-decoration:none;border:1px solid rgba(148,163,184,.35);transition:opacity .2s,border-color .2s}.ss-credit a:hover{opacity:1;border-color:#8B5CF6}.ss-credit img{width:20px;height:20px;border-radius:5px;display:block}.ss-credit b{font-weight:600}.ss-credit--fixed{position:fixed;left:10px;bottom:10px;z-index:9999;padding:0}.ss-credit--fixed a{background:rgba(11,15,20,.72);color:#e6eaf0;opacity:.9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}@media print{.ss-credit{display:none}}</style><div class="ss-credit"><a href="https://sujikumar.com/" rel="author" title="Built by Suji Kumar C — Digital Maritime Engineer"><img src="favicon.svg" alt="" width="20" height="20"><span>Built by <b>Suji Kumar C</b> · sujikumar.com</span></a></div>
 </body>
 </html>

@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <script>(function(){var t=null;try{t=localStorage.getItem('enginepulse-theme')}catch(e){}if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})();</script>
+  <meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#07080D" media="(prefers-color-scheme: dark)"/>
+  <link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin/>
   <meta name="author" content="Suji Kumar C" /><link rel="icon" type="image/svg+xml" href="favicon.svg"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>EnginePulse — Long Trial</title>
@@ -12,7 +16,7 @@
 <div class="page">
   <div class="breadcrumb"><a href="index.html">Dashboard</a> › Long Trial</div>
   <div class="page-header">
-    <div class="page-title">⏱️ Long Trial / Endurance Run</div>
+    <div class="page-title"><i data-ic="timer"></i> Long Trial / Endurance Run</div>
     <div class="page-sub">Continuous run at rated load · Periodic readings · Live trend chart · Certificate</div>
   </div>
   <div id="vessel-strip"></div>
@@ -90,7 +94,7 @@
       <div class="form-group"><label>Remarks</label><input type="text" id="qe-rem" placeholder="Any observations..."/></div>
       <div class="btn-row">
         <button class="btn btn-primary" onclick="addReading()">+ Add Reading</button>
-        <button class="btn btn-outline" onclick="autoStamp()">🕐 Stamp Now</button>
+        <button class="btn btn-outline" onclick="autoStamp()"><i data-ic="clock"></i> Stamp Now</button>
       </div>
     </div>
   </div>
@@ -145,18 +149,18 @@
   </div>
 
   <div class="btn-row no-print">
-    <button class="btn btn-primary" onclick="saveAll()">💾 Save</button>
+    <button class="btn btn-primary" onclick="saveAll()"><i data-ic="save"></i> Save</button>
     <button class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
-    <button class="btn btn-outline" onclick="exportLTExcel()">📊 Export Excel</button>
-    <button class="btn btn-outline" onclick="window.print()">🖨️ Print / Certificate</button>
-    <button class="btn btn-danger" onclick="clearReadings()">🗑️ Clear Readings</button>
-    <a href="signoff.html" class="btn btn-outline">✍️ Sign-off</a>
+    <button class="btn btn-outline" onclick="exportLTExcel()"><i data-ic="sheet"></i> Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()"><i data-ic="printer"></i> Print / Certificate</button>
+    <button class="btn btn-danger" onclick="clearReadings()"><i data-ic="trash"></i> Clear Readings</button>
+    <a href="signoff.html" class="btn btn-outline"><i data-ic="pen"></i> Sign-off</a>
   </div>
 </div>
 <footer>EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/vendor/chart.umd.min.js"></script>
+<script src="js/vendor/xlsx.full.min.js"></script>
 <script src="js/common.js"></script>
 <script>
 buildNavbar('longtrial');
@@ -184,7 +188,7 @@ function addReading() {
   row.alarm = '';
   if (parseFloat(row.lot) > loLimit)  row.alarm += 'HIGH LO TEMP ';
   if (parseFloat(row.exh) > exhLimit) row.alarm += 'HIGH EXH TEMP ';
-  if (row.alarm) toast('⚠️ ALARM: ' + row.alarm.trim(), 'warn');
+  if (row.alarm) toast('ALARM: ' + row.alarm.trim(), 'warn');
 
   readings.push(row);
   EP.save('lt-readings', readings);
@@ -274,18 +278,18 @@ function renderChart() {
   const ctx = document.getElementById('lt-chart').getContext('2d');
   ltChart = new Chart(ctx,{
     data:{labels, datasets:[
-      {type:'line',label:'RPM',  data:rpms,  borderColor:'#0DC8C8',tension:.3,yAxisID:'y',  fill:false,pointRadius:3},
-      {type:'line',label:'kW',   data:pwrs,  borderColor:'#818cf8',tension:.3,yAxisID:'y',  fill:false,pointRadius:3},
-      {type:'line',label:'Exh°C',data:exhs,  borderColor:'#f59e0b',tension:.3,yAxisID:'y2', fill:false,pointRadius:3},
-      {type:'line',label:'LO°C', data:lots,  borderColor:'#ef4444',tension:.3,yAxisID:'y2', fill:false,pointRadius:3},
+      {type:'line',label:'RPM',  data:rpms,  borderColor:cssVar('--g1'),tension:.3,yAxisID:'y',  fill:false,pointRadius:3},
+      {type:'line',label:'kW',   data:pwrs,  borderColor:cssVar('--g3'),tension:.3,yAxisID:'y',  fill:false,pointRadius:3},
+      {type:'line',label:'Exh°C',data:exhs,  borderColor:cssVar('--t-warn'),tension:.3,yAxisID:'y2', fill:false,pointRadius:3},
+      {type:'line',label:'LO°C', data:lots,  borderColor:cssVar('--t-danger'),tension:.3,yAxisID:'y2', fill:false,pointRadius:3},
     ]},
     options:{
       responsive:true, interaction:{mode:'index',intersect:false},
-      plugins:{legend:{labels:{color:'#7ACFCF',font:{family:'Roboto',size:11}}}},
+      plugins:{legend:{labels:{}}},
       scales:{
-        y:  {grid:{color:'rgba(10,150,150,0.1)'},ticks:{color:'#7ACFCF'},title:{display:true,text:'RPM / kW',color:'#7ACFCF'}},
-        y2: {position:'right',grid:{drawOnChartArea:false},ticks:{color:'#7ACFCF'},title:{display:true,text:'Temperature °C',color:'#7ACFCF'}},
-        x:  {grid:{color:'rgba(10,150,150,0.1)'},ticks:{color:'#7ACFCF'}},
+        y:  {grid:{},ticks:{},title:{display:true,text:'RPM / kW'}},
+        y2: {position:'right',grid:{drawOnChartArea:false},ticks:{},title:{display:true,text:'Temperature °C'}},
+        x:  {grid:{},ticks:{}},
       }
     }
   });
@@ -317,6 +321,5 @@ function exportLTExcel() {
 renderLog(); renderChart(); renderSummary(); updateProgress();
 autoStamp();
 </script>
-<!-- sujikumar.com credit --><style id="ss-credit-css">.ss-credit{display:flex;justify-content:center;padding:16px 12px 20px;font:500 12px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}.ss-credit a{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;color:inherit;opacity:.78;text-decoration:none;border:1px solid rgba(148,163,184,.35);transition:opacity .2s,border-color .2s}.ss-credit a:hover{opacity:1;border-color:#8B5CF6}.ss-credit img{width:20px;height:20px;border-radius:5px;display:block}.ss-credit b{font-weight:600}.ss-credit--fixed{position:fixed;left:10px;bottom:10px;z-index:9999;padding:0}.ss-credit--fixed a{background:rgba(11,15,20,.72);color:#e6eaf0;opacity:.9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}@media print{.ss-credit{display:none}}</style><div class="ss-credit"><a href="https://sujikumar.com/" rel="author" title="Built by Suji Kumar C — Digital Maritime Engineer"><img src="favicon.svg" alt="" width="20" height="20"><span>Built by <b>Suji Kumar C</b> · sujikumar.com</span></a></div>
 </body>
 </html>

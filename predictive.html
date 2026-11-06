@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <script>(function(){var t=null;try{t=localStorage.getItem('enginepulse-theme')}catch(e){}if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})();</script>
+  <meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#07080D" media="(prefers-color-scheme: dark)"/>
+  <link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin/>
   <meta name="author" content="Suji Kumar C" /><link rel="icon" type="image/svg+xml" href="favicon.svg"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>EnginePulse — Predictive</title>
@@ -12,7 +16,7 @@
 <div class="page">
   <div class="breadcrumb"><a href="index.html">Dashboard</a> › Predictive & Forecasting</div>
   <div class="page-header">
-    <div class="page-title">🔮 Predictive & Forecasting</div>
+    <div class="page-title"><i data-ic="trend"></i> Predictive & Forecasting</div>
     <div class="page-sub">Running hours · Maintenance schedule · Performance trends · RUL estimator · Next overhaul forecast</div>
   </div>
   <div id="vessel-strip"></div>
@@ -106,16 +110,16 @@
   </div>
 
   <div class="btn-row no-print">
-    <button class="btn btn-primary" onclick="savePred()">💾 Save</button>
+    <button class="btn btn-primary" onclick="savePred()"><i data-ic="save"></i> Save</button>
     <button class="btn btn-outline" onclick="markDone()">✓ Mark Complete</button>
-    <button class="btn btn-outline" onclick="exportPredExcel()">📊 Export Excel</button>
-    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-outline" onclick="exportPredExcel()"><i data-ic="sheet"></i> Export Excel</button>
+    <button class="btn btn-outline" onclick="window.print()"><i data-ic="printer"></i> Print</button>
   </div>
 </div>
 <footer>EnginePulse &nbsp;·&nbsp; <a href="guide.html">Guide</a></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/vendor/chart.umd.min.js"></script>
+<script src="js/vendor/xlsx.full.min.js"></script>
 <script src="js/common.js"></script>
 <script>
 buildNavbar('predictive');
@@ -125,15 +129,15 @@ let perfLog  = EP.load('pred-perf', []);
 let hoursLog = EP.load('pred-hours', []);
 
 const INTERVALS = [
-  { label:'Daily Check',         hours:24,    icon:'📋', items:'LO level, fuel, cooling water, bilges, alarms' },
-  { label:'Weekly Check',        hours:168,   icon:'📅', items:'Filters inspection, battery check, belts/hoses, bearing lubrication' },
-  { label:'250-Hour Service',    hours:250,   icon:'🔩', items:'LO & filters change, injector cleaning, governor oil, V-belt tension' },
-  { label:'500-Hour Service',    hours:500,   icon:'🔧', items:'Air filter, fuel filter, coolant treatment, coupling inspection' },
-  { label:'1,000-Hour Major',    hours:1000,  icon:'⚙️', items:'Valve clearance, injector testing, T/C inspection, LO sample analysis' },
-  { label:'2,000-Hour Overhaul', hours:2000,  icon:'🏗️', items:'Piston & liner inspection, bearing check, fuel pump overhaul' },
-  { label:'4,000-Hour Overhaul', hours:4000,  icon:'🔨', items:'Top overhaul — head removal, valve seat grinding, piston ring renewal' },
-  { label:'8,000-Hour Major',    hours:8000,  icon:'⚡', items:'Major overhaul — crank bearing, T/C rebuild, full inspection' },
-  { label:'Dry Dock (5-year)',   hours:43800, icon:'🚢', items:'Underwater inspection, shaft seal, propeller, sea chests, class renewal' },
+  { label:'Daily Check',         hours:24,    icon:'clipboard', items:'LO level, fuel, cooling water, bilges, alarms' },
+  { label:'Weekly Check',        hours:168,   icon:'calendar', items:'Filters inspection, battery check, belts/hoses, bearing lubrication' },
+  { label:'250-Hour Service',    hours:250,   icon:'nut', items:'LO & filters change, injector cleaning, governor oil, V-belt tension' },
+  { label:'500-Hour Service',    hours:500,   icon:'wrench', items:'Air filter, fuel filter, coolant treatment, coupling inspection' },
+  { label:'1,000-Hour Major',    hours:1000,  icon:'cog', items:'Valve clearance, injector testing, T/C inspection, LO sample analysis' },
+  { label:'2,000-Hour Overhaul', hours:2000,  icon:'crane', items:'Piston & liner inspection, bearing check, fuel pump overhaul' },
+  { label:'4,000-Hour Overhaul', hours:4000,  icon:'hammer', items:'Top overhaul — head removal, valve seat grinding, piston ring renewal' },
+  { label:'8,000-Hour Major',    hours:8000,  icon:'zap', items:'Major overhaul — crank bearing, T/C rebuild, full inspection' },
+  { label:'Dry Dock (5-year)',   hours:43800, icon:'ship', items:'Underwater inspection, shaft seal, propeller, sea chests, class renewal' },
 ];
 
 function updateSchedule() {
@@ -147,9 +151,9 @@ function updateSchedule() {
     const dueDate = new Date(Date.now() + days*86400000);
     const pct   = Math.min(100, (cur % s.hours) / s.hours * 100);
     const urgent = rem < s.hours*0.1;
-    return `<div class="card" style="border-color:${urgent?'rgba(245,158,11,0.5)':done?'rgba(34,197,94,0.2)':'var(--border)'}">
+    return `<div class="card" style="border-color:${urgent?'color-mix(in srgb, var(--warn) 50%, var(--border))':done?'color-mix(in srgb, var(--pass) 30%, var(--border))':'var(--border)'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <span style="font-size:18px">${s.icon}</span>
+        <span style="font-size:18px;color:var(--action)">${epIcon(s.icon)}</span>
         ${urgent?'<span class="badge badge-warn">Due Soon</span>':done?'<span class="badge badge-pass">Due</span>':''}
       </div>
       <div style="font-size:12px;font-weight:700;margin-bottom:3px">${s.label}</div>
@@ -175,8 +179,8 @@ function updateSchedule() {
         const rem  = Math.max(0,next-cur);
         const daily2 = daily||20;
         const dueDate2 = new Date(Date.now()+(rem/daily2)*86400000);
-        return `<div class="stat-tile" style="border-color:rgba(245,158,11,0.4)">
-          <div class="stat-label">${s.icon} ${s.label}</div>
+        return `<div class="stat-tile" style="border-color:color-mix(in srgb, var(--warn) 45%, var(--border))">
+          <div class="stat-label">${epIcon(s.icon)} ${s.label}</div>
           <div class="stat-value" style="font-size:16px;color:var(--warn)">${rem.toLocaleString()} hrs</div>
           <div class="stat-sub">${dueDate2.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
         </div>`;
@@ -269,10 +273,10 @@ function makeChart(id, label, color, data, labels) {
     data:{labels, datasets:[{label, data, borderColor:color, backgroundColor:color+'22', fill:true, tension:.3, pointRadius:3}]},
     options:{
       responsive:true,
-      plugins:{legend:{labels:{color:'#7ACFCF',font:{family:'Roboto',size:11}}}},
+      plugins:{legend:{labels:{}}},
       scales:{
-        y:{grid:{color:'rgba(10,150,150,0.1)'},ticks:{color:'#7ACFCF'}},
-        x:{grid:{color:'rgba(10,150,150,0.1)'},ticks:{color:'#7ACFCF',maxTicksLimit:8}},
+        y:{grid:{},ticks:{}},
+        x:{grid:{},ticks:{maxTicksLimit:8}},
       }
     }
   });
@@ -281,10 +285,10 @@ function makeChart(id, label, color, data, labels) {
 function renderPerfCharts() {
   if (!perfLog.length) return;
   const labels = perfLog.map(r=>r.date||r.hrs||'');
-  makeChart('sfoc-chart', 'SFOC g/kWh', '#0DC8C8', perfLog.map(r=>parseFloat(r.sfoc)||null), labels);
-  makeChart('exh-chart',  'Exh Avg °C', '#f59e0b', perfLog.map(r=>parseFloat(r.exh)||null),  labels);
-  makeChart('lo-chart',   'LO L/day',   '#818cf8', perfLog.map(r=>parseFloat(r.loc)||null),  labels);
-  makeChart('vib-chart',  'Vibration',  '#ef4444', perfLog.map(r=>parseFloat(r.vib)||null),  labels);
+  makeChart('sfoc-chart', 'SFOC g/kWh', cssVar('--g1'), perfLog.map(r=>parseFloat(r.sfoc)||null), labels);
+  makeChart('exh-chart',  'Exh Avg °C', cssVar('--t-warn'), perfLog.map(r=>parseFloat(r.exh)||null),  labels);
+  makeChart('lo-chart',   'LO L/day',   cssVar('--g3'), perfLog.map(r=>parseFloat(r.loc)||null),  labels);
+  makeChart('vib-chart',  'Vibration',  cssVar('--t-danger'), perfLog.map(r=>parseFloat(r.vib)||null),  labels);
 }
 
 function savePred() { EP.save('pred-perf',perfLog); EP.save('pred-hours',hoursLog); toast('Predictive data saved','pass'); }
@@ -305,6 +309,5 @@ updateSchedule();
 document.getElementById('cur-hours')?.addEventListener('input', updateSchedule);
 document.getElementById('daily-hrs')?.addEventListener('input', updateSchedule);
 </script>
-<!-- sujikumar.com credit --><style id="ss-credit-css">.ss-credit{display:flex;justify-content:center;padding:16px 12px 20px;font:500 12px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}.ss-credit a{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;color:inherit;opacity:.78;text-decoration:none;border:1px solid rgba(148,163,184,.35);transition:opacity .2s,border-color .2s}.ss-credit a:hover{opacity:1;border-color:#8B5CF6}.ss-credit img{width:20px;height:20px;border-radius:5px;display:block}.ss-credit b{font-weight:600}.ss-credit--fixed{position:fixed;left:10px;bottom:10px;z-index:9999;padding:0}.ss-credit--fixed a{background:rgba(11,15,20,.72);color:#e6eaf0;opacity:.9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}@media print{.ss-credit{display:none}}</style><div class="ss-credit"><a href="https://sujikumar.com/" rel="author" title="Built by Suji Kumar C — Digital Maritime Engineer"><img src="favicon.svg" alt="" width="20" height="20"><span>Built by <b>Suji Kumar C</b> · sujikumar.com</span></a></div>
 </body>
 </html>
